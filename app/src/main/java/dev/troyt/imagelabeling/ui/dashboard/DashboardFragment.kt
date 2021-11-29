@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import dev.troyt.imagelabeling.R
 import dev.troyt.imagelabeling.databinding.FragmentDashboardBinding
 
 class DashboardFragment : Fragment() {
