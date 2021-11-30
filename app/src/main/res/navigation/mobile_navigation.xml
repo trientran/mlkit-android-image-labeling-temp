@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/navigation_notifications"
-        android:name="dev.troyt.imagelabeling.ui.notifications.NotificationsFragment"
+        android:name="dev.troyt.imagelabeling.ui.notifications.ImagesFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
 </navigation>

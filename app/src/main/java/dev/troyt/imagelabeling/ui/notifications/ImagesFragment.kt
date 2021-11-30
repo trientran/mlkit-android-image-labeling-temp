@@ -10,7 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import dev.troyt.imagelabeling.databinding.FragmentNotificationsBinding
 
-class NotificationsFragment : Fragment() {
+class ImagesFragment : Fragment() {
 
     private lateinit var notificationsViewModel: NotificationsViewModel
     private var _binding: FragmentNotificationsBinding? = null

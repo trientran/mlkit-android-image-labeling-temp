@@ -19,8 +19,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
@@ -50,7 +48,6 @@ class HomeFragment : Fragment() {
     // Contains the recognition result. Since  it is a viewModel, it will survive screen rotations
     private val recogViewModel: RecognitionListViewModel by viewModels()
 
-    private lateinit var homeViewModel: HomeViewModel
     private var _binding: FragmentHomeBinding? = null
 
     // This property is only valid between onCreateView and
@@ -62,9 +59,6 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-        homeViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java)
 
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
@@ -94,10 +88,6 @@ class HomeFragment : Fragment() {
                 viewAdapter.submitList(it)
             }
         )
-
-        homeViewModel.text.observe(viewLifecycleOwner, Observer {
-            //textView.text = it
-        })
         return root
     }
 

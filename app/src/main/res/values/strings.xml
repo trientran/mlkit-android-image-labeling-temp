@@ -4,5 +4,6 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="permission_deny_text">Required permissions denied. Exiting.</string>
+    <string name="select_a_photo_btn">Pick a photo</string>
 
 </resources>
