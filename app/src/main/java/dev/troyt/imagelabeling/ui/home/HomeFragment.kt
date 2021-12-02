@@ -214,21 +214,18 @@ class HomeFragment : Fragment() {
 
             // set the minimum confidence required:
             val options = ImageLabelerOptions.Builder()
-                .setConfidenceThreshold(0.4f)
+                .setConfidenceThreshold(0.5f)
                 .build()
             val labeler = ImageLabeling.getClient(options)
 
             inputImage?.let {
                 labeler.process(it)
                     .addOnSuccessListener { mutableList ->
-                        mutableList.forEach {
-                            Log.d("trien", it.confidence.toString())
+                        val maxResultDisplayed = when {
+                            mutableList.size >= MAX_RESULT_DISPLAY -> MAX_RESULT_DISPLAY
+                            else -> mutableList.size
                         }
-                        // Task completed successfully
-                        mutableList.sortByDescending { imageLabel ->
-                            imageLabel.confidence
-                        }
-                        for (i in 0 until MAX_RESULT_DISPLAY) {
+                        for (i in 0 until maxResultDisplayed) {
                             items.add(
                                 Recognition(
                                     label = mutableList[i].text + " " + mutableList[i].index,
@@ -236,17 +233,15 @@ class HomeFragment : Fragment() {
                                 )
                             )
                         }
+                        // Return the result
+                        listener(items.toList())
+                        // Close the image,this tells CameraX to feed the next image to the analyzer
+                        imageProxy.close()
                     }
                     .addOnFailureListener {
                         Log.e("Error", it.localizedMessage ?: "some error")
                     }
             }
-
-            // Return the result
-            listener(items.toList())
-
-            // Close the image,this tells CameraX to feed the next image to the analyzer
-            imageProxy.close()
         }
 
         /**

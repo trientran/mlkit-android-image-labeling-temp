@@ -63,6 +63,7 @@ class DashboardFragment : Fragment() {
         // LiveData field of recognitionList.
         recogViewModel.recognitionList.observe(viewLifecycleOwner,
             {
+                Log.d("trien1", it.toString())
                 viewAdapter.submitList(it)
             }
         )
@@ -165,36 +166,31 @@ class DashboardFragment : Fragment() {
 
         // set the minimum confidence required:
         val options = ImageLabelerOptions.Builder()
-            .setConfidenceThreshold(0.4f)
+            .setConfidenceThreshold(0.5f)
             .build()
         val labeler = ImageLabeling.getClient(options)
 
-        inputImage.let {
-            labeler.process(it)
-                .addOnSuccessListener { mutableList ->
-                    mutableList.forEach {
-                        Log.d("trien", it.confidence.toString())
-                    }
-                    // Task completed successfully
-                    mutableList.sortByDescending { imageLabel ->
-                        imageLabel.confidence
-                    }
-                    for (i in 0 until MAX_RESULT_DISPLAY) {
-                        items.add(
-                            Recognition(
-                                label = mutableList[i].text + " " + mutableList[i].index,
-                                confidence = mutableList[i].confidence
-                            )
+        labeler.process(inputImage)
+            .addOnSuccessListener { mutableList ->
+                val maxResultDisplayed = when {
+                    mutableList.size >= MAX_RESULT_DISPLAY -> MAX_RESULT_DISPLAY
+                    else -> mutableList.size
+                }
+                for (i in 0 until maxResultDisplayed) {
+                    items.add(
+                        Recognition(
+                            label = mutableList[i].text + " " + mutableList[i].index,
+                            confidence = mutableList[i].confidence
                         )
-                    }
+                    )
                 }
-                .addOnFailureListener {
-                    Log.e("Error", it.localizedMessage ?: "some error")
-                }
-        }
-        // Return the result
-        Log.v("trien", items.toList().toString())
-        recogViewModel.updateData(items)
+                // Return the result
+                Log.v("trien3", items.toList().toString())
+                recogViewModel.updateData(items)
+            }
+            .addOnFailureListener {
+                Log.e("Error", it.localizedMessage ?: "some error")
+            }
     }
 
     override fun onDestroyView() {
