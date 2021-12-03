@@ -1,5 +1,6 @@
 package dev.troyt.imagelabeling.ui.dashboard
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
@@ -20,6 +21,7 @@ import androidx.fragment.app.viewModels
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
+import dev.troyt.imagelabeling.R
 import dev.troyt.imagelabeling.databinding.FragmentDashboardBinding
 import dev.troyt.imagelabeling.ui.RecognitionAdapter
 import dev.troyt.imagelabeling.ui.home.MAX_RESULT_DISPLAY
@@ -46,11 +48,11 @@ class DashboardFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val resultLauncher = activityResultLauncher()
+        val resultLauncher = activityResultLauncher(requireContext())
 
         binding.loadImageBtn.setOnClickListener { onPickPhoto(resultLauncher) }
 
@@ -108,7 +110,7 @@ class DashboardFragment : Fragment() {
 
     }
 
-    private fun activityResultLauncher(): ActivityResultLauncher<Intent> {
+    private fun activityResultLauncher(context: Context): ActivityResultLauncher<Intent> {
         val resultLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == AppCompatActivity.RESULT_OK) {
@@ -119,11 +121,9 @@ class DashboardFragment : Fragment() {
                     // Load the image located at photoUri into selectedImage
                     val selectedImage = loadFromUri(photoUri)
 
-                    // Load the selected image into a preview
-                    binding.localImageView.setImageBitmap(selectedImage)
-
-                    if (selectedImage != null) {
-                        predictImage(selectedImage)
+                    selectedImage?.let {
+                        predictImage(context, it)
+                        binding.localImageView.setImageBitmap(it)
                     }
                 }
             }
@@ -150,47 +150,43 @@ class DashboardFragment : Fragment() {
         return image
     }
 
-    private fun predictImage(selectedImage: Bitmap) {
-
-        val items = mutableListOf<Recognition>()
-
-        // TODO 2: Resize and Convert Image to Bitmap then to TensorImage
-        //      val resizedBitmap: Bitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, SOME_WIDTH)
-        /*Bitmap.createScaledBitmap(
-            selectedImage,
-            224,
-            224,
-            false
-        )*/
+    private fun predictImage(context: Context, selectedImage: Bitmap) {
+        val recognitionList = mutableListOf<Recognition>()
         val inputImage: InputImage = InputImage.fromBitmap(selectedImage, 0)
 
         // set the minimum confidence required:
         val options = ImageLabelerOptions.Builder()
-            .setConfidenceThreshold(0.5f)
+            .setConfidenceThreshold(0.8f)
             .build()
-        val labeler = ImageLabeling.getClient(options)
 
-        labeler.process(inputImage)
-            .addOnSuccessListener { mutableList ->
-                val maxResultDisplayed = when {
-                    mutableList.size >= MAX_RESULT_DISPLAY -> MAX_RESULT_DISPLAY
-                    else -> mutableList.size
+        val labeler = ImageLabeling.getClient(options)
+        inputImage.let {
+            labeler.process(it)
+                .addOnSuccessListener { results ->
+                    for (i in 0 until MAX_RESULT_DISPLAY) {
+                        try {
+                            recognitionList.add(
+                                Recognition(
+                                    label = results[i].text + " " + results[i].index,
+                                    confidence = results[i].confidence
+                                )
+                            )
+                        } catch (e: Exception) {
+                            recognitionList.add(
+                                Recognition(
+                                    label = context.getString(R.string.no_result),
+                                    confidence = 0f
+                                )
+                            )
+                        }
+                    }
+                    // Update the recognition result list
+                    recogViewModel.updateData(recognitionList)
                 }
-                for (i in 0 until maxResultDisplayed) {
-                    items.add(
-                        Recognition(
-                            label = mutableList[i].text + " " + mutableList[i].index,
-                            confidence = mutableList[i].confidence
-                        )
-                    )
+                .addOnFailureListener {
+                    Log.e("Error", it.localizedMessage ?: "some error")
                 }
-                // Return the result
-                Log.v("trien3", items.toList().toString())
-                recogViewModel.updateData(items)
-            }
-            .addOnFailureListener {
-                Log.e("Error", it.localizedMessage ?: "some error")
-            }
+        }
     }
 
     override fun onDestroyView() {

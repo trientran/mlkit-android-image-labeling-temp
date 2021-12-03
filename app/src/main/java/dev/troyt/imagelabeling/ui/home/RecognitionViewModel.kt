@@ -25,11 +25,18 @@ class RecognitionListViewModel : ViewModel() {
     // This is a LiveData field. Choosing this structure because the whole list tend to be updated
     // at once in ML and not individual elements. Updating this once for the entire list makes
     // sense.
+
     private val _recognitionList = MutableLiveData<List<Recognition>>()
-    val recognitionList: LiveData<List<Recognition>> = _recognitionList
+    val recognitionList: LiveData<List<Recognition>> get() = _recognitionList
 
     fun updateData(recognitions: List<Recognition>) {
         _recognitionList.postValue(recognitions)
+    }
+
+    fun addData(recognition: Recognition) {
+        val currentList = _recognitionList.value as MutableList<Recognition>
+        currentList.add(recognition)
+        updateData(currentList)
     }
 }
 
@@ -48,4 +55,8 @@ data class Recognition(val label: String, val confidence: Float) {
 
     // get a vietnamese name for the herb (only display the name, not the herb's key)
     val vietHerb = label.substring(5) // coz the original label name is "0001 cam thảo"
+}
+
+fun <T> MutableLiveData<T>.notifyObserver() {
+    this.value = this.value
 }

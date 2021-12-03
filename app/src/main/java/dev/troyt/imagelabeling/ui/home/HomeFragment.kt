@@ -1,11 +1,8 @@
 package dev.troyt.imagelabeling.ui.home
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.Matrix
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
@@ -25,7 +22,6 @@ import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import dev.troyt.imagelabeling.R
 import dev.troyt.imagelabeling.databinding.FragmentHomeBinding
 import dev.troyt.imagelabeling.ui.RecognitionAdapter
-import dev.troyt.imagelabeling.ui.YuvToRgbConverter
 import java.util.concurrent.Executors
 
 // Constants
@@ -195,18 +191,15 @@ class HomeFragment : Fragment() {
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    private class ImageAnalyzer(ctx: Context, private val listener: RecognitionListener) :
-        ImageAnalysis.Analyzer {
-
-        // TODO 1: Add class variable TensorFlow Lite Model
-        // Initializing the flowerModel by lazy so that it runs in the same thread when the process
-        // method is called.
-
+    private class ImageAnalyzer(
+        private val context: Context,
+        private val listener: RecognitionListener
+    ) : ImageAnalysis.Analyzer {
 
         @ExperimentalGetImage
         override fun analyze(imageProxy: ImageProxy) {
 
-            val items = mutableListOf<Recognition>()
+            val recognitionList = mutableListOf<Recognition>()
 
             val inputImage = imageProxy.image?.let {
                 InputImage.fromMediaImage(it, imageProxy.imageInfo.rotationDegrees)
@@ -214,27 +207,32 @@ class HomeFragment : Fragment() {
 
             // set the minimum confidence required:
             val options = ImageLabelerOptions.Builder()
-                .setConfidenceThreshold(0.5f)
+                .setConfidenceThreshold(0.8f)
                 .build()
-            val labeler = ImageLabeling.getClient(options)
 
+            val labeler = ImageLabeling.getClient(options)
             inputImage?.let {
                 labeler.process(it)
-                    .addOnSuccessListener { mutableList ->
-                        val maxResultDisplayed = when {
-                            mutableList.size >= MAX_RESULT_DISPLAY -> MAX_RESULT_DISPLAY
-                            else -> mutableList.size
-                        }
-                        for (i in 0 until maxResultDisplayed) {
-                            items.add(
-                                Recognition(
-                                    label = mutableList[i].text + " " + mutableList[i].index,
-                                    confidence = mutableList[i].confidence
+                    .addOnSuccessListener { results ->
+                        for (i in 0 until MAX_RESULT_DISPLAY) {
+                            try {
+                                recognitionList.add(
+                                    Recognition(
+                                        label = results[i].text + " " + results[i].index,
+                                        confidence = results[i].confidence
+                                    )
                                 )
-                            )
+                            } catch (e: Exception) {
+                                recognitionList.add(
+                                    Recognition(
+                                        label = context.getString(R.string.no_result),
+                                        confidence = 0f
+                                    )
+                                )
+                            }
                         }
                         // Return the result
-                        listener(items.toList())
+                        listener(recognitionList.toList())
                         // Close the image,this tells CameraX to feed the next image to the analyzer
                         imageProxy.close()
                     }
@@ -242,44 +240,6 @@ class HomeFragment : Fragment() {
                         Log.e("Error", it.localizedMessage ?: "some error")
                     }
             }
-        }
-
-        /**
-         * Convert Image Proxy to Bitmap
-         */
-        private val yuvToRgbConverter = YuvToRgbConverter(ctx)
-        private lateinit var bitmapBuffer: Bitmap
-        private lateinit var rotationMatrix: Matrix
-
-        @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
-        private fun toBitmap(imageProxy: ImageProxy): Bitmap? {
-
-            val image = imageProxy.image ?: return null
-
-            // Initialise Buffer
-            if (!::bitmapBuffer.isInitialized) {
-                // The image rotation and RGB image buffer are initialized only once
-                Log.d(TAG, "Initalise toBitmap()")
-                rotationMatrix = Matrix()
-                rotationMatrix.postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
-                bitmapBuffer = Bitmap.createBitmap(
-                    imageProxy.width, imageProxy.height, Bitmap.Config.ARGB_8888
-                )
-            }
-
-            // Pass image to an image analyser
-            yuvToRgbConverter.yuvToRgb(image, bitmapBuffer)
-
-            // Create the Bitmap in the correct orientation
-            return Bitmap.createBitmap(
-                bitmapBuffer,
-                0,
-                0,
-                bitmapBuffer.width,
-                bitmapBuffer.height,
-                rotationMatrix,
-                false
-            )
         }
     }
 }
