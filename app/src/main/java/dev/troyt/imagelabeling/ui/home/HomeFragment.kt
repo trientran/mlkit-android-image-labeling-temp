@@ -42,7 +42,7 @@ class HomeFragment : Fragment() {
     private val cameraExecutor = Executors.newSingleThreadExecutor()
 
     // Contains the recognition result. Since  it is a viewModel, it will survive screen rotations
-    private val recogViewModel: RecognitionListViewModel by viewModels()
+    private val recogViewModel: RecognitionViewModel by viewModels()
 
     private var _binding: FragmentHomeBinding? = null
 
@@ -70,11 +70,11 @@ class HomeFragment : Fragment() {
 
         // Initialising the resultRecyclerView and its linked viewAdaptor
         val viewAdapter = RecognitionAdapter(requireContext())
-        binding.recognitionRecyclerView.adapter = viewAdapter
+        binding.recyclerView.adapter = viewAdapter
 
         // Disable recycler view animation to reduce flickering, otherwise items can move, fade in
         // and out as the list change
-        binding.recognitionRecyclerView.itemAnimator = null
+        binding.recyclerView.itemAnimator = null
 
         // Attach an observer on the LiveData field of recognitionList
         // This will notify the recycler view to update every time when a new list is set on the
@@ -200,7 +200,6 @@ class HomeFragment : Fragment() {
         override fun analyze(imageProxy: ImageProxy) {
 
             val recognitionList = mutableListOf<Recognition>()
-
             val inputImage = imageProxy.image?.let {
                 InputImage.fromMediaImage(it, imageProxy.imageInfo.rotationDegrees)
             }

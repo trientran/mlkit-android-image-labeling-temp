@@ -1,6 +1,5 @@
 package dev.troyt.imagelabeling.ui.notifications
 
-import android.Manifest
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
@@ -14,28 +13,19 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import dev.troyt.imagelabeling.R
 import dev.troyt.imagelabeling.databinding.FragmentNotificationsBinding
 import dev.troyt.imagelabeling.ui.RecognitionAdapter
-import dev.troyt.imagelabeling.ui.home.MAX_RESULT_DISPLAY
 import dev.troyt.imagelabeling.ui.home.Recognition
-import dev.troyt.imagelabeling.ui.home.RecognitionListViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
+import dev.troyt.imagelabeling.ui.home.RecognitionViewModel
 import java.io.IOException
 
 class ImagesFragment : Fragment() {
@@ -43,7 +33,7 @@ class ImagesFragment : Fragment() {
     private var photoUri: Uri? = null
 
     // Contains the recognition result. Since  it is a viewModel, it will survive screen rotations
-    private val recogViewModel: RecognitionListViewModel by viewModels()
+    private val recogViewModel: RecognitionViewModel by viewModels()
     private var _binding: FragmentNotificationsBinding? = null
 
     // This property is only valid between onCreateView and
@@ -60,7 +50,7 @@ class ImagesFragment : Fragment() {
 
         val resultLauncher = activityResultLauncher(requireContext())
 
-        binding.loadImageBtn.setOnClickListener { onPickPhoto(resultLauncher) }
+        binding.pickPhotoBtn.setOnClickListener { onPickPhoto(resultLauncher) }
 
         // Initialising the resultRecyclerView and its linked viewAdaptor
         val viewAdapter = RecognitionAdapter(requireContext())
@@ -72,7 +62,10 @@ class ImagesFragment : Fragment() {
         recogViewModel.recognitionList.observe(viewLifecycleOwner,
             {
                 Log.d("trien1", it.toString())
+                binding.imageView2.setImageBitmap(it[0].image)
                 viewAdapter.submitList(it)
+                Log.d("trien1", it.toString())
+
             }
         )
         return root
@@ -96,23 +89,14 @@ class ImagesFragment : Fragment() {
         val resultLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == AppCompatActivity.RESULT_OK) {
-
                     val clipData: ClipData? = result.data?.clipData
-                    if (clipData != null) {
-                        for (i in 0 until clipData.itemCount) {
-                            val photoUri: Uri = clipData.getItemAt(i).uri
+                    clipData?.let { data ->
+                        for (i in 0 until data.itemCount) {
+                            val photoUri: Uri = data.getItemAt(i).uri
                             Log.d("trienzzz", photoUri.toString())
                             // Load the image located at photoUri into selectedImage
                             val selectedImage: Bitmap? = loadFromUri(photoUri)
                             selectedImage?.let { predictImage(context, it) }
-                        }
-                    } else {
-                        val data: Intent? = result.data
-                        photoUri = data?.data
-                        Log.d("trienyyy", photoUri.toString())
-                        val selectedImage = loadFromUri(photoUri)
-                        if (selectedImage != null) {
-                            predictImage(context, selectedImage)
                         }
                     }
                 }
@@ -146,40 +130,33 @@ class ImagesFragment : Fragment() {
 
         // set the minimum confidence required:
         val options = ImageLabelerOptions.Builder()
-            .setConfidenceThreshold(0.8f)
+            .setConfidenceThreshold(0.5f)
             .build()
 
         val labeler = ImageLabeling.getClient(options)
         inputImage.let {
             labeler.process(it)
                 .addOnSuccessListener { results ->
-                    for (i in 0 until MAX_RESULT_DISPLAY) {
                         try {
                             recognitionList.add(
                                 Recognition(
-                                    label = results[i].text + " " + results[i].index,
-                                    confidence = results[i].confidence
+                                    image = selectedImage,
+                                    label = results[0].text + " " + results[0].index,
+                                    confidence = results[0].confidence
                                 )
                             )
                         } catch (e: Exception) {
                             recognitionList.add(
                                 Recognition(
+                                    image = selectedImage,
                                     label = context.getString(R.string.no_result),
                                     confidence = 0f
                                 )
                             )
                         }
-                    }
-                    Log.d("trienoi", recognitionList[0].toString())
 
+                    Log.d("trienoi", recognitionList[0].toString())
                     recogViewModel.addData(recognitionList[0])
-                    // Update the recognition result list
-                    //todo recogViewModel.updateData
-                    /*val nextImageRecognitionResults: Flow<List<Recognition>> = flow {
-                        while(true) {
-                            emit(recognitionList)
-                        }
-                    }.flowOn(Dispatchers.IO)*/
                 }
                 .addOnFailureListener {
                     Log.e("Error", it.localizedMessage ?: "some error")

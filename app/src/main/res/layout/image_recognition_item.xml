@@ -6,28 +6,39 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/confidenceTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible"
+        tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
     <TextView
-        android:id="@+id/recognitionName"
+        android:id="@+id/labelTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:text="@{recognitionItem.displayHerbPerSystemLanguage}"
         android:textAppearance="?attr/textAppearanceHeadline6"
         android:textColor="@color/white"
-        app:layout_constraintBaseline_toBaselineOf="@+id/recognitionProb"
+        app:layout_constraintBaseline_toBaselineOf="@+id/confidenceTextView"
         app:layout_constraintStart_toStartOf="parent"
         tools:text="Orange" />
 
     <TextView
-        android:id="@+id/recognitionProb"
+        android:id="@+id/confidenceTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:text="@{recognitionItem.probabilityString}"
         android:textAppearance="?attr/textAppearanceHeadline6"
         android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         tools:text="99%" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

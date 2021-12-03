@@ -26,7 +26,7 @@ import dev.troyt.imagelabeling.databinding.FragmentDashboardBinding
 import dev.troyt.imagelabeling.ui.RecognitionAdapter
 import dev.troyt.imagelabeling.ui.home.MAX_RESULT_DISPLAY
 import dev.troyt.imagelabeling.ui.home.Recognition
-import dev.troyt.imagelabeling.ui.home.RecognitionListViewModel
+import dev.troyt.imagelabeling.ui.home.RecognitionViewModel
 import java.io.IOException
 
 private const val TAG = "TFL Classify2" // Name for logging
@@ -37,7 +37,7 @@ class DashboardFragment : Fragment() {
     private var photoUri: Uri? = null
 
     // Contains the recognition result. Since  it is a viewModel, it will survive screen rotations
-    private val recogViewModel: RecognitionListViewModel by viewModels()
+    private val viewModel: RecognitionViewModel by viewModels()
     private var _binding: FragmentDashboardBinding? = null
 
     // This property is only valid between onCreateView and
@@ -54,7 +54,7 @@ class DashboardFragment : Fragment() {
 
         val resultLauncher = activityResultLauncher(requireContext())
 
-        binding.loadImageBtn.setOnClickListener { onPickPhoto(resultLauncher) }
+        binding.pickPhotoBtn.setOnClickListener { onPickPhoto(resultLauncher) }
 
         // Initialising the resultRecyclerView and its linked viewAdaptor
         val viewAdapter = RecognitionAdapter(requireContext())
@@ -63,7 +63,7 @@ class DashboardFragment : Fragment() {
         // Attach an observer on the LiveData field of recognitionList
         // This will notify the recycler view to update every time when a new list is set on the
         // LiveData field of recognitionList.
-        recogViewModel.recognitionList.observe(viewLifecycleOwner,
+        viewModel.recognitionList.observe(viewLifecycleOwner,
             {
                 Log.d("trien1", it.toString())
                 viewAdapter.submitList(it)
@@ -78,17 +78,14 @@ class DashboardFragment : Fragment() {
         outState.putString(IMAGE_URL_KEY, photoUri.toString())
     }
 
-    //todo
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
         photoUri = savedInstanceState?.getString(IMAGE_URL_KEY, "null")?.toUri()
         // Load the image located at photoUri into selectedImage
 
         // Load the selected image into a preview
-        if (photoUri.toString() != "null") {
-            val selectedImage = loadFromUri(photoUri)
-            binding.localImageView.setImageBitmap(selectedImage)
-        }
+        val selectedImage = photoUri?.let { toBitmapFromUri(requireContext(), it) }
+        binding.localImageView.setImageBitmap(selectedImage)
     }
 
     // Trigger gallery selection for a photo
@@ -107,7 +104,6 @@ class DashboardFragment : Fragment() {
 //        }
 
         resultLauncher.launch(intent)
-
     }
 
     private fun activityResultLauncher(context: Context): ActivityResultLauncher<Intent> {
@@ -117,10 +113,8 @@ class DashboardFragment : Fragment() {
                     // There are no request codes
                     val data: Intent? = result.data
                     photoUri = data?.data
-
                     // Load the image located at photoUri into selectedImage
-                    val selectedImage = loadFromUri(photoUri)
-
+                    val selectedImage = photoUri?.let { toBitmapFromUri(context, it) }
                     selectedImage?.let {
                         predictImage(context, it)
                         binding.localImageView.setImageBitmap(it)
@@ -130,29 +124,28 @@ class DashboardFragment : Fragment() {
         return resultLauncher
     }
 
-    private fun loadFromUri(photoUri: Uri?): Bitmap? {
+    private fun toBitmapFromUri(context: Context, photoUri: Uri): Bitmap? {
         var image: Bitmap? = null
         try {
             // check version of Android on device
             image = if (Build.VERSION.SDK_INT > 27) {
                 // on newer versions of Android, use the new decodeBitmap method
                 val source: ImageDecoder.Source =
-                    ImageDecoder.createSource(requireContext().contentResolver, photoUri!!)
+                    ImageDecoder.createSource(context.contentResolver, photoUri)
                 ImageDecoder.decodeBitmap(source)
             } else {
                 // support older versions of Android by using getBitmap
-                MediaStore.Images.Media.getBitmap(requireContext().contentResolver, photoUri)
+                MediaStore.Images.Media.getBitmap(context.contentResolver, photoUri)
             }
         } catch (e: IOException) {
             e.printStackTrace()
         }
-
         return image
     }
 
-    private fun predictImage(context: Context, selectedImage: Bitmap) {
+    private fun predictImage(context: Context, selectedBitmapImage: Bitmap) {
         val recognitionList = mutableListOf<Recognition>()
-        val inputImage: InputImage = InputImage.fromBitmap(selectedImage, 0)
+        val inputImage: InputImage = InputImage.fromBitmap(selectedBitmapImage, 0)
 
         // set the minimum confidence required:
         val options = ImageLabelerOptions.Builder()
@@ -181,7 +174,7 @@ class DashboardFragment : Fragment() {
                         }
                     }
                     // Update the recognition result list
-                    recogViewModel.updateData(recognitionList)
+                    viewModel.updateData(recognitionList)
                 }
                 .addOnFailureListener {
                     Log.e("Error", it.localizedMessage ?: "some error")

@@ -14,7 +14,7 @@
     </androidx.camera.view.PreviewView>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recognitionRecyclerView"
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
