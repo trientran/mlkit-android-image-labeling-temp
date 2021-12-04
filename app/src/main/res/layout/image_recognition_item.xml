@@ -9,15 +9,15 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:scaleType="fitCenter"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/confidenceTextView"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible"
-        tools:srcCompat="@tools:sample/backgrounds/scenic" />
+        tools:srcCompat="@tools:sample/avatars"
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/labelTextView"

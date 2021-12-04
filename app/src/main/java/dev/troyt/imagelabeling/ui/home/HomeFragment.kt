@@ -10,9 +10,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -31,7 +31,7 @@ private const val REQUEST_CODE_PERMISSIONS = 999 // Return code after asking for
 private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA) // permission needed
 
 // Listener for the result of the ImageAnalyzer
-typealias RecognitionListener = (recognition: List<Recognition>) -> Unit
+typealias RecognitionListener = (recognition: MutableList<Recognition>) -> Unit
 
 class HomeFragment : Fragment() {
 
@@ -42,7 +42,7 @@ class HomeFragment : Fragment() {
     private val cameraExecutor = Executors.newSingleThreadExecutor()
 
     // Contains the recognition result. Since  it is a viewModel, it will survive screen rotations
-    private val recogViewModel: RecognitionViewModel by viewModels()
+    private val recognitionViewModel: RecognitionViewModel by viewModels()
 
     private var _binding: FragmentHomeBinding? = null
 
@@ -63,9 +63,12 @@ class HomeFragment : Fragment() {
         if (allPermissionsGranted()) {
             startCamera()
         } else {
-            ActivityCompat.requestPermissions(
-                requireActivity(), REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
-            )
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.camera_permission_required),
+                Toast.LENGTH_SHORT
+            ).show()
+            permissionRequestLauncher.launch(REQUIRED_PERMISSIONS)
         }
 
         // Initialising the resultRecyclerView and its linked viewAdaptor
@@ -79,7 +82,7 @@ class HomeFragment : Fragment() {
         // Attach an observer on the LiveData field of recognitionList
         // This will notify the recycler view to update every time when a new list is set on the
         // LiveData field of recognitionList.
-        recogViewModel.recognitionList.observe(viewLifecycleOwner,
+        recognitionViewModel.recognitionList.observe(viewLifecycleOwner,
             {
                 viewAdapter.submitList(it)
             }
@@ -96,18 +99,12 @@ class HomeFragment : Fragment() {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-
-    /**
-     * This gets called after the Camera permission pop up is shown.
-     */
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray,
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (allPermissionsGranted()) {
+    private val permissionRequestLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val granted = permissions.entries.all {
+                it.value == true
+            }
+            if (granted) {
                 startCamera()
             } else {
                 // Exit the app if permission is not granted
@@ -119,11 +116,8 @@ class HomeFragment : Fragment() {
                     getString(R.string.permission_deny_text),
                     Toast.LENGTH_SHORT
                 ).show()
-                requireActivity().finish()
             }
         }
-    }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -163,7 +157,7 @@ class HomeFragment : Fragment() {
                         cameraExecutor,
                         ImageAnalyzer(requireContext()) { items ->
                             // updating the list of recognised objects
-                            recogViewModel.updateData(items)
+                            recognitionViewModel.updateData(items)
                         })
                 }
 
@@ -231,7 +225,7 @@ class HomeFragment : Fragment() {
                             }
                         }
                         // Return the result
-                        listener(recognitionList.toList())
+                        listener(recognitionList)
                         // Close the image,this tells CameraX to feed the next image to the analyzer
                         imageProxy.close()
                     }

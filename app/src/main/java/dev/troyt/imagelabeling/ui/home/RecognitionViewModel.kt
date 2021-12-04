@@ -1,6 +1,6 @@
 package dev.troyt.imagelabeling.ui.home
 
-import android.graphics.Bitmap
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,26 +11,31 @@ class RecognitionViewModel : ViewModel() {
     // at once in ML and not individual elements. Updating this once for the entire list makes
     // sense.
 
-    private val _recognitionList = MutableLiveData<List<Recognition>>()
-    val recognitionList: LiveData<List<Recognition>> get() = _recognitionList
+    private val _recognitionList = MutableLiveData<MutableList<Recognition>>(mutableListOf())
+    val recognitionList: LiveData<MutableList<Recognition>> get() = _recognitionList
 
-    fun updateData(recognitions: List<Recognition>) {
-        _recognitionList.postValue(recognitions)
+    fun updateData(recognitions: MutableList<Recognition>) {
+        _recognitionList.value = recognitions
     }
 
     fun addData(recognition: Recognition) {
-        recognitionList.value?.let {
-            val currentList = it as MutableList<Recognition>
-            currentList.add(recognition)
-            updateData(currentList)
+        val newList = mutableListOf<Recognition>()
+        _recognitionList.value?.let {
+            newList.addAll(it)
+            newList.add(recognition)
+            updateData(newList)
         }
+    }
+
+    fun clearAllData() {
+        _recognitionList.value?.clear()
     }
 }
 
 /**
  * Simple Data object with two fields for the label and probability
  */
-data class Recognition(val image: Bitmap? = null, val label: String, val confidence: Float) {
+data class Recognition(val imageUri: Uri? = null, val label: String, val confidence: Float) {
     // Output probability as a string to enable easy data binding
     val confidencePercentage = String.format("%.1f%%", confidence * 100.0f)
 

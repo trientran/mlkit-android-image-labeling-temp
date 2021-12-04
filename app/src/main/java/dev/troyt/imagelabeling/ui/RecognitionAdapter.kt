@@ -63,9 +63,9 @@ class ImageRecognitionItemViewHolder(private val binding: ImageRecognitionItemBi
     // Binding all the fields to the view - to see which UI element is bind to which field, check
     // out layout/recognition_item.xml
     fun bindTo(recognition: Recognition) {
-        recognition.image?.let {
+        recognition.imageUri?.let {
             binding.imageView.visibility = View.VISIBLE
-            binding.imageView.setImageBitmap(recognition.image)
+            binding.imageView.setImageURI(it)
         }
         binding.labelTextView.text = recognition.label
         binding.confidenceTextView.text = recognition.confidencePercentage

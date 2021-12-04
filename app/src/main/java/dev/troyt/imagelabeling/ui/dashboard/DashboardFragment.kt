@@ -52,7 +52,7 @@ class DashboardFragment : Fragment() {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val resultLauncher = activityResultLauncher(requireContext())
+        val resultLauncher = activityResultLauncher()
 
         binding.pickPhotoBtn.setOnClickListener { onPickPhoto(resultLauncher) }
 
@@ -106,7 +106,7 @@ class DashboardFragment : Fragment() {
         resultLauncher.launch(intent)
     }
 
-    private fun activityResultLauncher(context: Context): ActivityResultLauncher<Intent> {
+    private fun activityResultLauncher(): ActivityResultLauncher<Intent> {
         val resultLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == AppCompatActivity.RESULT_OK) {
@@ -114,9 +114,9 @@ class DashboardFragment : Fragment() {
                     val data: Intent? = result.data
                     photoUri = data?.data
                     // Load the image located at photoUri into selectedImage
-                    val selectedImage = photoUri?.let { toBitmapFromUri(context, it) }
+                    val selectedImage = photoUri?.let { toBitmapFromUri(requireContext(), it) }
                     selectedImage?.let {
-                        predictImage(context, it)
+                        predictImage(it)
                         binding.localImageView.setImageBitmap(it)
                     }
                 }
@@ -143,7 +143,7 @@ class DashboardFragment : Fragment() {
         return image
     }
 
-    private fun predictImage(context: Context, selectedBitmapImage: Bitmap) {
+    private fun predictImage(selectedBitmapImage: Bitmap) {
         val recognitionList = mutableListOf<Recognition>()
         val inputImage: InputImage = InputImage.fromBitmap(selectedBitmapImage, 0)
 
@@ -167,7 +167,7 @@ class DashboardFragment : Fragment() {
                         } catch (e: Exception) {
                             recognitionList.add(
                                 Recognition(
-                                    label = context.getString(R.string.no_result),
+                                    label = getString(R.string.no_result),
                                     confidence = 0f
                                 )
                             )
