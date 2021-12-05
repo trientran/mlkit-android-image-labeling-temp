@@ -114,7 +114,7 @@ class DashboardFragment : Fragment() {
                     val data: Intent? = result.data
                     photoUri = data?.data
                     // Load the image located at photoUri into selectedImage
-                    val selectedImage = photoUri?.let { toBitmapFromUri(requireContext(), it) }
+                    val selectedImage = photoUri?.toScaledBitmap(requireContext(), 224, 224)
                     selectedImage?.let {
                         predictImage(it)
                         binding.localImageView.setImageBitmap(it)
@@ -140,7 +140,23 @@ class DashboardFragment : Fragment() {
         } catch (e: IOException) {
             e.printStackTrace()
         }
+
         return image
+    }
+
+    private fun bitmap(image: Bitmap?): Bitmap? {
+        var image1 = image
+        val resizedBitmap = image1?.let {
+            Bitmap.createScaledBitmap(
+                it,
+                224,
+                224,
+                false
+            )
+        }
+        image1 = resizedBitmap?.copy(Bitmap.Config.ARGB_8888, true)
+
+        return image1
     }
 
     private fun predictImage(selectedBitmapImage: Bitmap) {
@@ -186,4 +202,36 @@ class DashboardFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+}
+
+fun Uri.toScaledBitmap(context: Context, width: Int, height: Int): Bitmap? {
+    val bitmapFromUri: Bitmap? = try {
+        // check version of Android on device
+        if (Build.VERSION.SDK_INT > 27) {
+            // on newer versions of Android, use the new decodeBitmap method
+            val source: ImageDecoder.Source =
+                ImageDecoder.createSource(context.contentResolver, this)
+            ImageDecoder.decodeBitmap(source)
+        } else {
+            // support older versions of Android by using getBitmap
+            MediaStore.Images.Media.getBitmap(context.contentResolver, this)
+        }
+    } catch (e: IOException) {
+        e.printStackTrace()
+        null
+    }
+
+    var resizedBitmap =
+        bitmapFromUri?.let {
+            Bitmap.createScaledBitmap(
+                it,
+                width,
+                height,
+                false
+            )
+        }
+
+    resizedBitmap = resizedBitmap?.copy(Bitmap.Config.ARGB_8888, true)
+
+    return resizedBitmap
 }

@@ -45,6 +45,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.3.5'
     implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
 
     // Use this dependency to bundle the model with your app
     implementation 'com.google.mlkit:image-labeling:17.0.5'
