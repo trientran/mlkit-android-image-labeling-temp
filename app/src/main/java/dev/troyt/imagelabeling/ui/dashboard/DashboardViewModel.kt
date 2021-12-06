@@ -12,6 +12,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.label.ImageLabeler
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import dev.troyt.imagelabeling.R
@@ -20,7 +21,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.lang.IndexOutOfBoundsException
 
 class DashboardViewModel : ViewModel() {
 
@@ -52,7 +52,7 @@ class DashboardViewModel : ViewModel() {
                 .setConfidenceThreshold(0.7f)
                 .build()
 
-            val labeler = ImageLabeling.getClient(options)
+            val labeler: ImageLabeler = ImageLabeling.getClient(options)
             labeler.process(inputImage)
                 .addOnSuccessListener { results ->
                     println("Trien2 Current Thread name is ${Thread.currentThread().name}")
@@ -79,6 +79,8 @@ class DashboardViewModel : ViewModel() {
                 .addOnFailureListener {
                     Log.e("Error", it.localizedMessage ?: "some error")
                 }
+                .result // TODO: 6/12/21  
+
         }
     }
 }

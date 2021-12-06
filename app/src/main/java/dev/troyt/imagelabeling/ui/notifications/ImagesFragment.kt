@@ -25,7 +25,6 @@ import dev.troyt.imagelabeling.R
 import dev.troyt.imagelabeling.databinding.FragmentNotificationsBinding
 import dev.troyt.imagelabeling.ui.RecognitionAdapter
 import dev.troyt.imagelabeling.ui.dashboard.toScaledBitmap
-import dev.troyt.imagelabeling.ui.home.Recognition
 import dev.troyt.imagelabeling.ui.home.RecognitionViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -167,7 +166,7 @@ class ImagesFragment : Fragment() {
                     }
             }
         }
-        // awaitClose()
+        // awaitClose(labeler.close) todo
     }
 
 
