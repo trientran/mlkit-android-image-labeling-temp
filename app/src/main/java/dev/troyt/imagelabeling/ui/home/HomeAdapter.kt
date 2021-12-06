@@ -17,52 +17,6 @@
 package dev.troyt.imagelabeling.ui.home
 
 import android.content.Context
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
-import dev.troyt.imagelabeling.databinding.ImageRecognitionItemBinding
-import dev.troyt.imagelabeling.ui.dashboard.SingleRecognition
+import dev.troyt.imagelabeling.ui.dashboard.DashboardAdapter
 
-class DashboardAdapter(private val context: Context) :
-    ListAdapter<SingleRecognition, ImageRecognitionItemViewHolder>(RecognitionDiffUtil()) {
-
-    /**
-     * Inflating the ViewHolder with recognition_item layout and data binding
-     */
-    override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int
-    ): ImageRecognitionItemViewHolder {
-        val inflater = LayoutInflater.from(context)
-        val binding = ImageRecognitionItemBinding.inflate(inflater, parent, false)
-        return ImageRecognitionItemViewHolder(binding)
-    }
-
-    // Binding the data fields to the RecognitionViewHolder
-    override fun onBindViewHolder(holderImage: ImageRecognitionItemViewHolder, position: Int) {
-        holderImage.bindTo(getItem(position))
-    }
-
-    private class RecognitionDiffUtil : DiffUtil.ItemCallback<SingleRecognition>() {
-        override fun areItemsTheSame(oldItem: SingleRecognition, newItem: SingleRecognition): Boolean {
-            return oldItem.label == newItem.label
-        }
-
-        override fun areContentsTheSame(oldItem: SingleRecognition, newItem: SingleRecognition): Boolean {
-            return oldItem.confidence == newItem.confidence
-        }
-    }
-}
-
-class ImageRecognitionItemViewHolder(private val binding: ImageRecognitionItemBinding) :
-    RecyclerView.ViewHolder(binding.root) {
-
-    // Binding all the fields to the view - to see which UI element is bind to which field, check
-    // out layout/recognition_item.xml
-    fun bindTo(recognition: SingleRecognition) {
-        binding.labelTextView.text = recognition.label
-        binding.confidenceTextView.text = recognition.confidencePercentage
-    }
-}
+class HomeAdapter(context: Context) : DashboardAdapter(context)

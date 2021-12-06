@@ -28,19 +28,11 @@ class DashboardViewModel : ViewModel() {
     // at once in ML and not individual elements. Updating this once for the entire list makes
     // sense.
 
-    private val _recognitionList = MutableLiveData<MutableList<SingleRecognition>>(mutableListOf())
-    val recognitionList: LiveData<MutableList<SingleRecognition>> get() = _recognitionList
+    private val _recognitionList = MutableLiveData<MutableList<Recognition>>(mutableListOf())
+    val recognitionList: LiveData<MutableList<Recognition>> get() = _recognitionList
 
-    private fun updateData(recognitions: MutableList<SingleRecognition>) {
+    private fun updateData(recognitions: MutableList<Recognition>) {
         _recognitionList.value = recognitions
-    }
-
-    fun addData(recognition: SingleRecognition) {
-        _recognitionList.value?.add(recognition)
-    }
-
-    fun clearAllData() {
-        _recognitionList.value?.clear()
     }
 
     fun inferImage(context: Context, selectedImageUri: Uri) {
@@ -53,7 +45,7 @@ class DashboardViewModel : ViewModel() {
             val bitmap = selectedImageUri.toScaledBitmap(context, 224, 224) ?: return@launch
 
             val inputImage = InputImage.fromBitmap(bitmap, 0)
-            val recognitionList = mutableListOf<SingleRecognition>()
+            val recognitionList = mutableListOf<Recognition>()
 
             // set the minimum confidence required:
             val options = ImageLabelerOptions.Builder()
@@ -67,14 +59,14 @@ class DashboardViewModel : ViewModel() {
                     for (i in 0 until MAX_RESULT_DISPLAY) {
                         try {
                             recognitionList.add(
-                                SingleRecognition(
+                                Recognition(
                                     label = results[i].text + " " + results[i].index,
                                     confidence = results[i].confidence
                                 )
                             )
                         } catch (e: IndexOutOfBoundsException) {
                             recognitionList.add(
-                                SingleRecognition(
+                                Recognition(
                                     label = context.getString(R.string.no_result),
                                     confidence = 0f
                                 )
@@ -94,7 +86,7 @@ class DashboardViewModel : ViewModel() {
 /**
  * Simple Data object with two fields for the label and probability
  */
-data class SingleRecognition(val label: String, val confidence: Float) {
+data class Recognition(val label: String, val confidence: Float) {
     // Output probability as a string to enable easy data binding
     val confidencePercentage = String.format("%.1f%%", confidence * 100.0f)
 

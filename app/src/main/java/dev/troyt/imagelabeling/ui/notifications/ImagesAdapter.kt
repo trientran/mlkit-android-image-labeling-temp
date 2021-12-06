@@ -23,10 +23,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import dev.troyt.imagelabeling.databinding.ImageRecognitionItemBinding
-import dev.troyt.imagelabeling.ui.dashboard.SingleRecognition
+import dev.troyt.imagelabeling.ui.dashboard.Recognition
 
 class DashboardAdapter(private val context: Context) :
-    ListAdapter<SingleRecognition, ImageRecognitionItemViewHolder>(RecognitionDiffUtil()) {
+    ListAdapter<Recognition, ImageRecognitionItemViewHolder>(RecognitionDiffUtil()) {
 
     /**
      * Inflating the ViewHolder with recognition_item layout and data binding
@@ -45,12 +45,12 @@ class DashboardAdapter(private val context: Context) :
         holderImage.bindTo(getItem(position))
     }
 
-    private class RecognitionDiffUtil : DiffUtil.ItemCallback<SingleRecognition>() {
-        override fun areItemsTheSame(oldItem: SingleRecognition, newItem: SingleRecognition): Boolean {
+    private class RecognitionDiffUtil : DiffUtil.ItemCallback<Recognition>() {
+        override fun areItemsTheSame(oldItem: Recognition, newItem: Recognition): Boolean {
             return oldItem.label == newItem.label
         }
 
-        override fun areContentsTheSame(oldItem: SingleRecognition, newItem: SingleRecognition): Boolean {
+        override fun areContentsTheSame(oldItem: Recognition, newItem: Recognition): Boolean {
             return oldItem.confidence == newItem.confidence
         }
     }
@@ -61,7 +61,7 @@ class ImageRecognitionItemViewHolder(private val binding: ImageRecognitionItemBi
 
     // Binding all the fields to the view - to see which UI element is bind to which field, check
     // out layout/recognition_item.xml
-    fun bindTo(recognition: SingleRecognition) {
+    fun bindTo(recognition: Recognition) {
         binding.labelTextView.text = recognition.label
         binding.confidenceTextView.text = recognition.confidencePercentage
     }

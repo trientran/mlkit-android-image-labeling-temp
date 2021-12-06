@@ -16,6 +16,7 @@ import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import dev.troyt.imagelabeling.R
 import dev.troyt.imagelabeling.ui.dashboard.toScaledBitmap
+import dev.troyt.imagelabeling.ui.notifications.Recognition
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,20 +43,4 @@ class RecognitionViewModel : ViewModel() {
         _recognitionList.value?.add(recognition)
     }
 
-    fun clearAllData() {
-        _recognitionList.value?.clear()
-    }
-}
-
-/**
- * Simple Data object with two fields for the label and probability
- */
-data class Recognition(val imageUri: Uri? = null, val label: String, val confidence: Float) {
-    // Output probability as a string to enable easy data binding
-    val confidencePercentage = String.format("%.1f%%", confidence * 100.0f)
-
-    // For easy logging
-    override fun toString(): String {
-        return "$label / $confidencePercentage"
-    }
 }
