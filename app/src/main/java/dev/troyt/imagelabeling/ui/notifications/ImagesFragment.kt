@@ -1,6 +1,7 @@
 package dev.troyt.imagelabeling.ui.notifications
 
 import android.annotation.SuppressLint
+import android.content.ClipData
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -14,9 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.mlkit.vision.common.InputImage
@@ -25,14 +24,14 @@ import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import dev.troyt.imagelabeling.R
 import dev.troyt.imagelabeling.databinding.FragmentNotificationsBinding
 import dev.troyt.imagelabeling.ui.RecognitionAdapter
+import dev.troyt.imagelabeling.ui.dashboard.toScaledBitmap
 import dev.troyt.imagelabeling.ui.home.Recognition
 import dev.troyt.imagelabeling.ui.home.RecognitionViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.*
 
 
-@ExperimentalCoroutinesApi
 class ImagesFragment : Fragment() {
 
     // Contains the recognition result. Since  it is a viewModel, it will survive screen rotations
@@ -73,14 +72,6 @@ class ImagesFragment : Fragment() {
 //            Log.d("trien1", it.toString())
 //        }
         //       )
-        /*lifecycleScope.launch {
-            recogViewModel.uiState.collect {
-            Log.d("trien2", it.toString())
-            val lastRowIndex = viewAdapter.itemCount
-            viewAdapter.submitList(it)
-            viewAdapter.notifyItemInserted(lastRowIndex)
-        } }*/
-
         return root
     }
 
@@ -101,24 +92,7 @@ class ImagesFragment : Fragment() {
                 result.data?.clipData?.let { clipData ->
                     imageCount = clipData.itemCount
                     val recognitionList = mutableListOf<Recognition>()
-                    // Start a coroutine in the lifecycle scope
-                    lifecycleScope.launch {
-                        // repeatOnLifecycle launches the block in a new coroutine every time the
-                        // lifecycle is in the STARTED state (or above) and cancels it when it's STOPPED.
-                        repeatOnLifecycle(Lifecycle.State.STARTED) {
-                            // Trigger the flow and start listening for values.
-                            // Note that this happens when lifecycle is STARTED and stops
-                            // collecting when the lifecycle is STOPPED
-                            recogViewModel.uiState
-                                .collect {
-                                    Log.d("trien2", it.toString())
-                                    val lastRowIndex = viewAdapter.itemCount
-                                    viewAdapter.submitList(it)
-                                    viewAdapter.notifyItemInserted(lastRowIndex)
-                                }
-                        }
-                    }
-                    /*predictImageFlow(clipData)
+                    predictImageFlow(clipData)
                         .flowOn(Dispatchers.Default)
                         .onEach {
                             //recogViewModel.addData(it)
@@ -129,7 +103,7 @@ class ImagesFragment : Fragment() {
                             adapter.submitList(recognitionList)
                             adapter.notifyItemInserted(lastRowIndex)
                         }.onCompletion { Log.d("trien", "fragment canceled") }
-                        .launchIn(this.lifecycleScope)*/
+                        .launchIn(this.lifecycleScope)
 
                     /*lifecycleScope.launch(Dispatchers.Default) {
                         predictImageFlow(clipData).
@@ -148,6 +122,53 @@ class ImagesFragment : Fragment() {
                 }
             }
         }
+
+
+    @ExperimentalCoroutinesApi
+    fun predictImageFlow(clipData: ClipData) = channelFlow {
+
+        println("Trien Current Thread name is ${Thread.currentThread().name}")
+
+        for (i in 0 until clipData.itemCount) {
+            val selectedImageUri: Uri = clipData.getItemAt(i).uri
+            val bitmap = selectedImageUri.toScaledBitmap(requireContext(), 224, 224)
+            if (bitmap != null) {
+                //predictImage(imageUri, bitmap)
+                val inputImage = InputImage.fromBitmap(bitmap, 0)
+
+                // set the minimum confidence required:
+                val options = ImageLabelerOptions.Builder()
+                    .setConfidenceThreshold(0.7f)
+                    .build()
+
+                val labeler = ImageLabeling.getClient(options)
+
+                var recognition: Recognition
+
+                labeler.process(inputImage)
+                    .addOnSuccessListener { results ->
+                        recognition = try {
+                            Recognition(
+                                imageUri = selectedImageUri,
+                                label = results[0].text + " " + results[0].index,
+                                confidence = results[0].confidence
+                            )
+                        } catch (e: Exception) {
+                            Recognition(
+                                imageUri = selectedImageUri,
+                                label = getString(R.string.no_result),
+                                confidence = 0f
+                            )
+                        }
+                        trySend(recognition)
+                    }
+                    .addOnFailureListener {
+                        Log.e("Error", it.localizedMessage ?: "some error")
+                    }
+            }
+        }
+        // awaitClose()
+    }
 
 
     private fun predictImage(selectedImageUri: Uri, bitmap: Bitmap) {
