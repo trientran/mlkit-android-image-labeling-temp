@@ -29,7 +29,7 @@ fun Uri.toScaledBitmap(context: Context, width: Int = 224, height: Int = 224): B
 /**
  * Simple Data object with two fields for the label and probability
  */
-data class Recognition(val label: String, val confidence: Float) {
+data class Recognition(val label: String, val confidence: Float, val imageUri: Uri? = null) {
     // Output probability as a string to enable easy data binding
     val confidencePercentage = String.format("%.1f%%", confidence * 100.0f)
 

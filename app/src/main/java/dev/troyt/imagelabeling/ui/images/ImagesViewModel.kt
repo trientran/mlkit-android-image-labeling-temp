@@ -1,9 +1,9 @@
 package dev.troyt.imagelabeling.ui.images
 
-import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import dev.troyt.imagelabeling.ui.Recognition
 
 class ImagesViewModel : ViewModel() {
 
@@ -24,18 +24,5 @@ class ImagesViewModel : ViewModel() {
 
     fun clearAllData() {
         _recognitionList.value?.clear()
-    }
-}
-
-/**
- * Simple Data object with two fields for the label and probability
- */
-data class Recognition(val imageUri: Uri? = null, val label: String, val confidence: Float) {
-    // Output probability as a string to enable easy data binding
-    val confidencePercentage = String.format("%.1f%%", confidence * 100.0f)
-
-    // For easy logging
-    override fun toString(): String {
-        return "$label / $confidencePercentage"
     }
 }

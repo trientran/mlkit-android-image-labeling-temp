@@ -1,6 +1,5 @@
 package dev.troyt.imagelabeling.ui.images
 
-import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.Intent
 import android.graphics.Bitmap
@@ -23,12 +22,14 @@ import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import dev.troyt.imagelabeling.R
 import dev.troyt.imagelabeling.databinding.FragmentImagesBinding
+import dev.troyt.imagelabeling.ui.Recognition
 import dev.troyt.imagelabeling.ui.toScaledBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 
-
+@ExperimentalCoroutinesApi
 class ImagesFragment : Fragment() {
 
     // Contains the recognition result. Since  it is a viewModel, it will survive screen rotations
@@ -73,7 +74,7 @@ class ImagesFragment : Fragment() {
     }
 
     // Trigger gallery selection for a photo
-    @ExperimentalCoroutinesApi
+
     private fun onPickPhoto() {
         // Create intent for picking a photo from the gallery
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
@@ -81,8 +82,6 @@ class ImagesFragment : Fragment() {
         resultLauncher.launch(intent)
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    @ExperimentalCoroutinesApi
     private var resultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == AppCompatActivity.RESULT_OK) {
@@ -120,11 +119,15 @@ class ImagesFragment : Fragment() {
             }
         }
 
-
-    @ExperimentalCoroutinesApi
-    fun predictImageFlow(clipData: ClipData) = channelFlow {
-
+    fun predictImageFlow(clipData: ClipData) = callbackFlow {
         println("Trien Current Thread name is ${Thread.currentThread().name}")
+
+        // set the minimum confidence required:
+        val options = ImageLabelerOptions.Builder()
+            .setConfidenceThreshold(0.7f)
+            .build()
+
+        val labeler = ImageLabeling.getClient(options)
 
         for (i in 0 until clipData.itemCount) {
             val selectedImageUri: Uri = clipData.getItemAt(i).uri
@@ -133,38 +136,35 @@ class ImagesFragment : Fragment() {
                 //predictImage(imageUri, bitmap)
                 val inputImage = InputImage.fromBitmap(bitmap, 0)
 
-                // set the minimum confidence required:
-                val options = ImageLabelerOptions.Builder()
-                    .setConfidenceThreshold(0.7f)
-                    .build()
-
-                val labeler = ImageLabeling.getClient(options)
-
                 var recognition: Recognition
 
                 labeler.process(inputImage)
                     .addOnSuccessListener { results ->
                         recognition = try {
                             Recognition(
-                                imageUri = selectedImageUri,
                                 label = results[0].text + " " + results[0].index,
-                                confidence = results[0].confidence
+                                confidence = results[0].confidence,
+                                imageUri = selectedImageUri
                             )
                         } catch (e: Exception) {
                             Recognition(
-                                imageUri = selectedImageUri,
                                 label = getString(R.string.no_result),
-                                confidence = 0f
+                                confidence = 0f,
+                                imageUri = selectedImageUri
                             )
                         }
-                        trySend(recognition)
+                        try {
+                            offer(recognition)
+                        } catch (e: Throwable) {
+                            // Event couldn't be sent to the flow
+                        }
                     }
                     .addOnFailureListener {
                         Log.e("Error", it.localizedMessage ?: "some error")
                     }
             }
         }
-        // awaitClose(labeler.close) todo
+        awaitClose { labeler.close() }
     }
 
 

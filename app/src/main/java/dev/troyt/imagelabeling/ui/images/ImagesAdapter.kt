@@ -22,10 +22,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import dev.troyt.imagelabeling.databinding.ImageRecognitionItemBinding
+import dev.troyt.imagelabeling.databinding.ImagesRecognitionItemBinding
+import dev.troyt.imagelabeling.ui.Recognition
 
 class ImagesAdapter(private val context: Context) :
-    ListAdapter<Recognition, ImageRecognitionItemViewHolder>(RecognitionDiffUtil()) {
+    ListAdapter<Recognition, ImagesRecognitionItemViewHolder>(RecognitionDiffUtil()) {
 
     /**
      * Inflating the ViewHolder with recognition_item layout and data binding
@@ -33,14 +34,14 @@ class ImagesAdapter(private val context: Context) :
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): ImageRecognitionItemViewHolder {
+    ): ImagesRecognitionItemViewHolder {
         val inflater = LayoutInflater.from(context)
-        val binding = ImageRecognitionItemBinding.inflate(inflater, parent, false)
-        return ImageRecognitionItemViewHolder(binding)
+        val binding = ImagesRecognitionItemBinding.inflate(inflater, parent, false)
+        return ImagesRecognitionItemViewHolder(binding)
     }
 
     // Binding the data fields to the RecognitionViewHolder
-    override fun onBindViewHolder(holderImage: ImageRecognitionItemViewHolder, position: Int) {
+    override fun onBindViewHolder(holderImage: ImagesRecognitionItemViewHolder, position: Int) {
         holderImage.bindTo(getItem(position))
     }
 
@@ -55,13 +56,14 @@ class ImagesAdapter(private val context: Context) :
     }
 }
 
-class ImageRecognitionItemViewHolder(private val binding: ImageRecognitionItemBinding) :
+class ImagesRecognitionItemViewHolder(private val binding: ImagesRecognitionItemBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
     // Binding all the fields to the view - to see which UI element is bind to which field, check
     // out layout/recognition_item.xml
     fun bindTo(recognition: Recognition) {
-        binding.labelTextView.text = recognition.label
-        binding.confidenceTextView.text = recognition.confidencePercentage
+        binding.imageView.setImageURI(recognition.imageUri)
+        binding.inclusion.labelTextView.text = recognition.label
+        binding.inclusion.confidenceTextView.text = recognition.confidencePercentage
     }
 }

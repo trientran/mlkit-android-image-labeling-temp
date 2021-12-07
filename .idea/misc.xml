@@ -9,6 +9,7 @@
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_notifications.xml" value="0.1887031408308004" />
         <entry key="app/src/main/res/layout/image_recognition_item.xml" value="0.2504528985507246" />
+        <entry key="app/src/main/res/layout/images_recognition_item.xml" value="0.5911458333333334" />
         <entry key="app/src/main/res/layout/item.xml" value="0.26132246376811596" />
         <entry key="app/src/main/res/layout/recognition_item.xml" value="0.26132246376811596" />
         <entry key="app/src/main/res/menu/bottom_nav_menu.xml" value="0.5911458333333334" />
