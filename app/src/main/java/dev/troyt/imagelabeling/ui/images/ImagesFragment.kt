@@ -1,4 +1,4 @@
-package dev.troyt.imagelabeling.ui.notifications
+package dev.troyt.imagelabeling.ui.images
 
 import android.annotation.SuppressLint
 import android.content.ClipData
@@ -22,10 +22,8 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import dev.troyt.imagelabeling.R
-import dev.troyt.imagelabeling.databinding.FragmentNotificationsBinding
-import dev.troyt.imagelabeling.ui.RecognitionAdapter
-import dev.troyt.imagelabeling.ui.dashboard.toScaledBitmap
-import dev.troyt.imagelabeling.ui.home.RecognitionViewModel
+import dev.troyt.imagelabeling.databinding.FragmentImagesBinding
+import dev.troyt.imagelabeling.ui.toScaledBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -34,10 +32,10 @@ import kotlinx.coroutines.flow.*
 class ImagesFragment : Fragment() {
 
     // Contains the recognition result. Since  it is a viewModel, it will survive screen rotations
-    private val recogViewModel: RecognitionViewModel by viewModels()
-    private var _binding: FragmentNotificationsBinding? = null
+    private val recogViewModel: ImagesViewModel by viewModels()
+    private var _binding: FragmentImagesBinding? = null
     private var imageCount: Int = 0
-    private lateinit var viewAdapter: RecognitionAdapter
+    private lateinit var viewAdapter: ImagesAdapter
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -48,13 +46,13 @@ class ImagesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
+        _binding = FragmentImagesBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         binding.pickPhotoBtn.setOnClickListener { onPickPhoto() }
 
         // Initialising the resultRecyclerView and its linked viewAdaptor
-        viewAdapter = RecognitionAdapter(requireContext())
+        viewAdapter = ImagesAdapter(requireContext())
         binding.recyclerView.adapter = viewAdapter
         // initialize an instance of linear layout manager
         val layoutOrientation =
@@ -97,7 +95,7 @@ class ImagesFragment : Fragment() {
                             //recogViewModel.addData(it)
                             recognitionList.add(it)
                             Log.d("trien", recognitionList.toString())
-                            val adapter = binding.recyclerView.adapter as RecognitionAdapter
+                            val adapter = binding.recyclerView.adapter as ImagesAdapter
                             val lastRowIndex = adapter.itemCount
                             adapter.submitList(recognitionList)
                             adapter.notifyItemInserted(lastRowIndex)

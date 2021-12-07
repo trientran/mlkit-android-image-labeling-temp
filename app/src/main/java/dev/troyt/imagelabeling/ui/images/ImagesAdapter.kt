@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.troyt.imagelabeling.ui.dashboard
+package dev.troyt.imagelabeling.ui.images
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -24,7 +24,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import dev.troyt.imagelabeling.databinding.ImageRecognitionItemBinding
 
-open class DashboardAdapter(private val context: Context) :
+class ImagesAdapter(private val context: Context) :
     ListAdapter<Recognition, ImageRecognitionItemViewHolder>(RecognitionDiffUtil()) {
 
     /**

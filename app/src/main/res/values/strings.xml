@@ -1,12 +1,13 @@
 <resources>
-    <string name="app_name">z ImageLabeling</string>
+    <string name="app_name">z Image Labeling</string>
     <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_camera">Camera</string>
+    <string name="title_images">Multi images</string>
     <string name="permission_deny_text">Required permissions denied.</string>
-    <string name="select_a_photo_btn">Pick a photo</string>
-    <string name="pick_photos">Pick Photos</string>
+    <string name="select_a_photo_btn">Pick a image</string>
+    <string name="pick_photos">Add images</string>
     <string name="no_result">No result</string>
     <string name="camera_permission_required">Camera access permission required!</string>
+    <string name="error_toast">An error occurred</string>
 
 </resources>

@@ -17,6 +17,52 @@
 package dev.troyt.imagelabeling.ui.home
 
 import android.content.Context
-import dev.troyt.imagelabeling.ui.dashboard.DashboardAdapter
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import dev.troyt.imagelabeling.databinding.ImageRecognitionItemBinding
+import dev.troyt.imagelabeling.ui.Recognition
 
-class HomeAdapter(context: Context) : DashboardAdapter(context)
+open class HomeAdapter(private val context: Context) :
+    ListAdapter<Recognition, ItemViewHolder>(RecognitionDiffUtil()) {
+
+    /**
+     * Inflating the ViewHolder with recognition_item layout and data binding
+     */
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): ItemViewHolder {
+        val inflater = LayoutInflater.from(context)
+        val binding = ImageRecognitionItemBinding.inflate(inflater, parent, false)
+        return ItemViewHolder(binding)
+    }
+
+    // Binding the data fields to the RecognitionViewHolder
+    override fun onBindViewHolder(holderImage: ItemViewHolder, position: Int) {
+        holderImage.bindTo(getItem(position))
+    }
+
+    private class RecognitionDiffUtil : DiffUtil.ItemCallback<Recognition>() {
+        override fun areItemsTheSame(oldItem: Recognition, newItem: Recognition): Boolean {
+            return oldItem.label == newItem.label
+        }
+
+        override fun areContentsTheSame(oldItem: Recognition, newItem: Recognition): Boolean {
+            return oldItem.confidence == newItem.confidence
+        }
+    }
+}
+
+class ItemViewHolder(private val binding: ImageRecognitionItemBinding) :
+    RecyclerView.ViewHolder(binding.root) {
+
+    // Binding all the fields to the view - to see which UI element is bind to which field, check
+    // out layout/recognition_item.xml
+    fun bindTo(recognition: Recognition) {
+        binding.labelTextView.text = recognition.label
+        binding.confidenceTextView.text = recognition.confidencePercentage
+    }
+}
