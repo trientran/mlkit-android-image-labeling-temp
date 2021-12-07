@@ -63,7 +63,7 @@ class ImagesRecognitionItemViewHolder(private val binding: ImagesRecognitionItem
     // out layout/recognition_item.xml
     fun bindTo(recognition: Recognition) {
         binding.imageView.setImageURI(recognition.imageUri)
-        binding.inclusion.labelTextView.text = recognition.label
-        binding.inclusion.confidenceTextView.text = recognition.confidencePercentage
+        binding.labelTextView.text = recognition.label
+        binding.confidenceTextView.text = recognition.confidencePercentage
     }
 }

@@ -45,7 +45,7 @@ class HomeViewModel : ViewModel() {
         // Create a new coroutine on the UI thread
         viewModelScope.launch(defaultDispatcher) {
 
-            val bitmap = selectedImageUri.toScaledBitmap(context, 224, 224)
+            val bitmap = selectedImageUri.toScaledBitmap(context, 224, 224) ?: return@launch
             val inputImage = InputImage.fromBitmap(bitmap, 0)
 
             // set the minimum confidence required:
@@ -76,6 +76,9 @@ class HomeViewModel : ViewModel() {
                     }
                     Log.d(tag, recognitionList.toString())
                     updateData(recognitionList)
+                }
+                .addOnFailureListener {
+                    Log.e(tag, it.localizedMessage ?: "some error")
                 }
         }
     }

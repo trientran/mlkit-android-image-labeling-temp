@@ -4,11 +4,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -76,17 +74,7 @@ class HomeFragment : Fragment() {
                     imageUri?.let {
                         // Load the image located at photoUri into selectedImage
                         viewModel.setImageUri(it)
-
-                        try {
-                            viewModel.inferImage(requireContext(), it)
-                        } catch (e: Exception) {
-                            Log.e(tag, e.localizedMessage ?: "some error")
-                            Toast.makeText(
-                                requireContext(),
-                                e.localizedMessage ?: "some error",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
+                        viewModel.inferImage(requireContext(), it)
                     }
                 }
             }
