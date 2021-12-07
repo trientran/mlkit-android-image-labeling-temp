@@ -23,8 +23,8 @@ import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import dev.troyt.imagelabeling.R
 import dev.troyt.imagelabeling.databinding.FragmentImagesBinding
 import dev.troyt.imagelabeling.ui.Recognition
+import dev.troyt.imagelabeling.ui.defaultDispatcher
 import dev.troyt.imagelabeling.ui.toScaledBitmap
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
@@ -89,7 +89,7 @@ class ImagesFragment : Fragment() {
                     imageCount = clipData.itemCount
                     val recognitionList = mutableListOf<Recognition>()
                     predictImageFlow(clipData)
-                        .flowOn(Dispatchers.Default)
+                        .flowOn(defaultDispatcher)
                         .onEach {
                             //recogViewModel.addData(it)
                             recognitionList.add(it)
@@ -154,13 +154,13 @@ class ImagesFragment : Fragment() {
                             )
                         }
                         try {
-                            offer(recognition)
+                            trySend(recognition)
                         } catch (e: Throwable) {
-                            // Event couldn't be sent to the flow
+                            Log.e(tag, e.localizedMessage ?: "some error")
                         }
                     }
                     .addOnFailureListener {
-                        Log.e("Error", it.localizedMessage ?: "some error")
+                        Log.e(tag, it.localizedMessage ?: "some error")
                     }
             }
         }

@@ -44,7 +44,8 @@ class HomeViewModel : ViewModel() {
     ) {
         // Create a new coroutine on the UI thread
         viewModelScope.launch(defaultDispatcher) {
-            val bitmap = selectedImageUri.toScaledBitmap(context, 224, 224) ?: return@launch
+
+            val bitmap = selectedImageUri.toScaledBitmap(context, 224, 224)
             val inputImage = InputImage.fromBitmap(bitmap, 0)
 
             // set the minimum confidence required:
@@ -54,7 +55,7 @@ class HomeViewModel : ViewModel() {
 
             val labeler = ImageLabeling.getClient(options)
             labeler.process(inputImage)
-                .addOnSuccessListener {results->
+                .addOnSuccessListener { results ->
                     val recognitionList = mutableListOf<Recognition>()
                     for (i in 0 until maxResultsDisplayed) {
                         try {
@@ -75,9 +76,6 @@ class HomeViewModel : ViewModel() {
                     }
                     Log.d(tag, recognitionList.toString())
                     updateData(recognitionList)
-                }
-                .addOnFailureListener {
-                    Log.e(tag, it.localizedMessage ?: "some error")
                 }
         }
     }

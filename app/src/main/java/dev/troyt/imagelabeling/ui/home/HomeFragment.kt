@@ -8,10 +8,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dev.troyt.imagelabeling.databinding.FragmentHomeBinding
@@ -75,8 +75,18 @@ class HomeFragment : Fragment() {
                     imageUri = result.data?.data
                     imageUri?.let {
                         // Load the image located at photoUri into selectedImage
-                        viewModel.setImageUri(imageUri!!)
-                        viewModel.inferImage(requireContext(), it)
+                        viewModel.setImageUri(it)
+
+                        try {
+                            viewModel.inferImage(requireContext(), it)
+                        } catch (e: Exception) {
+                            Log.e(tag, e.localizedMessage ?: "some error")
+                            Toast.makeText(
+                                requireContext(),
+                                e.localizedMessage ?: "some error",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
                 }
             }
