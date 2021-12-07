@@ -37,5 +37,4 @@
         app:layout_constraintBottom_toBottomOf="parent"
         tools:text="99%" />
 
-
 </androidx.constraintlayout.widget.ConstraintLayout>
