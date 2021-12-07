@@ -1,11 +1,7 @@
 package dev.troyt.imagelabeling.ui.home
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -18,20 +14,13 @@ import dev.troyt.imagelabeling.R
 import dev.troyt.imagelabeling.ui.Recognition
 import dev.troyt.imagelabeling.ui.defaultDispatcher
 import dev.troyt.imagelabeling.ui.toScaledBitmap
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.IOException
-
-
 
 
 class HomeViewModel : ViewModel() {
-
     // This is a LiveData field. Choosing this structure because the whole list tend to be updated
     // at once in ML and not individual elements. Updating this once for the entire list makes
     // sense.
-
     private val tag = HomeViewModel::class.simpleName
 
     private val _imageUri = MutableLiveData<Uri>()
@@ -51,7 +40,7 @@ class HomeViewModel : ViewModel() {
         context: Context,
         selectedImageUri: Uri,
         confidence: Float = 0.7f,
-        maxResultsCollected: Int = 3
+        maxResultsDisplayed: Int = 3
     ) {
         // Create a new coroutine on the UI thread
         viewModelScope.launch(defaultDispatcher) {
@@ -67,7 +56,7 @@ class HomeViewModel : ViewModel() {
             labeler.process(inputImage)
                 .addOnSuccessListener {results->
                     val recognitionList = mutableListOf<Recognition>()
-                    for (i in 0 until maxResultsCollected) {
+                    for (i in 0 until maxResultsDisplayed) {
                         try {
                             recognitionList.add(
                                 Recognition(

@@ -1,24 +1,22 @@
 package dev.troyt.imagelabeling.ui.camera
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.*
+import androidx.camera.core.Camera
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.label.ImageLabeling
-import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import dev.troyt.imagelabeling.R
 import dev.troyt.imagelabeling.databinding.FragmentCameraBinding
 import dev.troyt.imagelabeling.ui.Recognition
@@ -26,8 +24,6 @@ import java.util.concurrent.Executors
 
 // Constants
 const val MAX_RESULT_DISPLAY = 3 // Maximum number of results displayed
-private const val TAG = "TFL Classify" // Name for logging
-private const val REQUEST_CODE_PERMISSIONS = 999 // Return code after asking for permission
 private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA) // permission needed
 
 // Listener for the result of the ImageAnalyzer
@@ -119,10 +115,6 @@ class CameraFragment : Fragment() {
             }
         }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
 
     /**
      * Start the Camera which involves:
@@ -132,39 +124,25 @@ class CameraFragment : Fragment() {
      * 3. Attach both to the lifecycle of this activity
      * 4. Pipe the output of the preview object to the PreviewView on the screen
      */
+
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
 
         cameraProviderFuture.addListener(Runnable {
+
+            imageAnalyzer = cameraViewModel.analyzeImage(requireContext(), cameraExecutor)
+
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-
-            preview = Preview.Builder()
-                .build()
-
-            imageAnalyzer = ImageAnalysis.Builder()
-                // This sets the ideal size for the image to be analyse, CameraX will choose the
-                // the most suitable resolution which may not be exactly the same or hold the same
-                // aspect ratio
-                .setTargetResolution(Size(224, 224))
-                // How the Image Analyser should pipe in input, 1. every frame but drop no frame, or
-                // 2. go to the latest frame and may drop some frame. The default is 2.
-                // STRATEGY_KEEP_ONLY_LATEST. The following line is optional, kept here for clarity
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build()
-                .also { analysisUseCase: ImageAnalysis ->
-                    analysisUseCase.setAnalyzer(
-                        cameraExecutor,
-                        ImageAnalyzer(requireContext()) { items ->
-                            // updating the list of recognised objects
-                            cameraViewModel.updateData(items)
-                        })
-                }
 
             // Select camera, back is the default. If it is not available, choose front camera
             val cameraSelector =
                 if (cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA))
                     CameraSelector.DEFAULT_BACK_CAMERA else CameraSelector.DEFAULT_FRONT_CAMERA
+
+
+            preview = Preview.Builder()
+                .build()
 
             try {
                 // Unbind use cases before rebinding
@@ -179,60 +157,15 @@ class CameraFragment : Fragment() {
                 // Attach the preview to preview view, aka View Finder
                 preview.setSurfaceProvider(binding.cameraView.surfaceProvider)
             } catch (exc: Exception) {
-                Log.e(TAG, "Use case binding failed", exc)
+                Log.e(tag, "Use case binding failed", exc)
             }
 
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    private class ImageAnalyzer(
-        private val context: Context,
-        private val listener: RecognitionListener
-    ) : ImageAnalysis.Analyzer {
-
-        @ExperimentalGetImage
-        override fun analyze(imageProxy: ImageProxy) {
-
-            val recognitionList = mutableListOf<Recognition>()
-            val inputImage = imageProxy.image?.let {
-                InputImage.fromMediaImage(it, imageProxy.imageInfo.rotationDegrees)
-            }
-
-            // set the minimum confidence required:
-            val options = ImageLabelerOptions.Builder()
-                .setConfidenceThreshold(0.8f)
-                .build()
-
-            val labeler = ImageLabeling.getClient(options)
-            inputImage?.let {
-                labeler.process(it)
-                    .addOnSuccessListener { results ->
-                        for (i in 0 until MAX_RESULT_DISPLAY) {
-                            try {
-                                recognitionList.add(
-                                    Recognition(
-                                        label = results[i].text + " " + results[i].index,
-                                        confidence = results[i].confidence
-                                    )
-                                )
-                            } catch (e: Exception) {
-                                recognitionList.add(
-                                    Recognition(
-                                        label = context.getString(R.string.no_result),
-                                        confidence = 0f
-                                    )
-                                )
-                            }
-                        }
-                        // Return the result
-                        listener(recognitionList)
-                        // Close the image,this tells CameraX to feed the next image to the analyzer
-                        imageProxy.close()
-                    }
-                    .addOnFailureListener {
-                        Log.e("Error", it.localizedMessage ?: "some error")
-                    }
-            }
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
+
 }
