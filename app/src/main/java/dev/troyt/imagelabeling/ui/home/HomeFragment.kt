@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.bumptech.glide.Glide
 import dev.troyt.imagelabeling.databinding.FragmentHomeBinding
 import dev.troyt.imagelabeling.ui.READ_EXTERNAL_STORAGE_PERMISSION
 import dev.troyt.imagelabeling.ui.callbackForPermissionResult
@@ -53,7 +54,7 @@ class HomeFragment : Fragment() {
             viewAdapter.submitList(it)
         })
         viewModel.imageUri.observe(viewLifecycleOwner, {
-            binding.localImageView.setImageURI(it)
+            Glide.with(this).load(it).into(binding.localImageView)
         })
         return root
     }

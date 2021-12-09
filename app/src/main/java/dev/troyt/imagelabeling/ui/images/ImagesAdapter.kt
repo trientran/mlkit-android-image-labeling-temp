@@ -22,6 +22,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import dev.troyt.imagelabeling.databinding.ImagesRecognitionItemBinding
 import dev.troyt.imagelabeling.ui.Recognition
 
@@ -61,7 +62,7 @@ class ImagesRecognitionItemViewHolder(private val binding: ImagesRecognitionItem
     // Binding all the fields to the view - to see which UI element is bind to which field, check
     // out layout/recognition_item.xml
     fun bindTo(recognition: Recognition) {
-        binding.imageView.setImageURI(recognition.imageUri)
+        Glide.with(binding.root).load(recognition.imageUri).override(500).into(binding.imageView)
         binding.labelTextView.text = recognition.label
         binding.confidenceTextView.text = recognition.confidencePercentage
     }
