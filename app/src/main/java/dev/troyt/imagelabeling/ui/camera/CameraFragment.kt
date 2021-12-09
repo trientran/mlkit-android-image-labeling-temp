@@ -1,12 +1,9 @@
 package dev.troyt.imagelabeling.ui.camera
 
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -15,13 +12,16 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import dev.troyt.imagelabeling.R
 import dev.troyt.imagelabeling.databinding.FragmentCameraBinding
-import dev.troyt.imagelabeling.ui.requiredPermissions
+import dev.troyt.imagelabeling.ui.CAMERA_PERMISSION
+import dev.troyt.imagelabeling.ui.callbackForPermissionResult
+import dev.troyt.imagelabeling.ui.checkPermission
 import timber.log.Timber
 import java.util.concurrent.Executors
 
 class CameraFragment : Fragment() {
+
+    private val callbackForPermissionResult = callbackForPermissionResult { startCamera() }
 
     // CameraX variables
     private lateinit var preview: Preview // Preview use case, fast, responsive view of the camera
@@ -37,6 +37,7 @@ class CameraFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -45,17 +46,6 @@ class CameraFragment : Fragment() {
         _binding = FragmentCameraBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        // Request camera permissions
-        if (allPermissionsGranted()) {
-            startCamera()
-        } else {
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.camera_permission_required),
-                Toast.LENGTH_SHORT
-            ).show()
-            permissionRequestLauncher.launch(requiredPermissions)
-        }
 
         // Initialising the resultRecyclerView and its linked viewAdaptor
         val viewAdapter = CameraAdapter(requireContext())
@@ -71,35 +61,16 @@ class CameraFragment : Fragment() {
         cameraViewModel.recognitionList.observe(viewLifecycleOwner, {
             viewAdapter.submitList(it)
         })
+
+        // Request camera permissions
+        if (this.checkPermission(CAMERA_PERMISSION)) {
+            startCamera()
+        } else {
+            callbackForPermissionResult.launch(CAMERA_PERMISSION)
+        }
+
         return root
     }
-
-    /**
-     * Check all permissions are granted - use for Camera permission in this example.
-     */
-    private fun allPermissionsGranted(): Boolean = requiredPermissions.all {
-        ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
-    }
-
-    private val permissionRequestLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            val granted = permissions.entries.all {
-                it.value == true
-            }
-            if (granted) {
-                startCamera()
-            } else {
-                // Exit the app if permission is not granted
-                // Best practice is to explain and offer a chance to re-request but this is out of
-                // scope in this sample. More details:
-                // https://developer.android.com/training/permissions/usage-notes
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.permission_deny_text),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
 
     /**
      * Start the Camera which involves:

@@ -7,14 +7,18 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dev.troyt.imagelabeling.databinding.FragmentHomeBinding
+import dev.troyt.imagelabeling.ui.READ_EXTERNAL_STORAGE_PERMISSION
+import dev.troyt.imagelabeling.ui.callbackForPermissionResult
+import dev.troyt.imagelabeling.ui.checkPermission
 
 class HomeFragment : Fragment() {
+
+    private val callbackForPermissionResult = callbackForPermissionResult { pickImage() }
 
     //private val tag = HomeViewModel::class.simpleName
     private var imageUri: Uri? = null
@@ -35,9 +39,7 @@ class HomeFragment : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val resultLauncher = activityResultLauncher()
-
-        binding.pickPhotoBtn.setOnClickListener { onPickPhoto(resultLauncher) }
+        binding.pickImageBtn.setOnClickListener { onPickImage() }
 
         // Initialising the resultRecyclerView and its linked viewAdaptor
         val viewAdapter = HomeAdapter(requireContext())
@@ -55,26 +57,31 @@ class HomeFragment : Fragment() {
         return root
     }
 
-    private fun onPickPhoto(resultLauncher: ActivityResultLauncher<Intent>) {
-        // Create intent for picking a photo from the gallery
-        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        resultLauncher.launch(intent)
+    private fun onPickImage() {
+        if (this.checkPermission(READ_EXTERNAL_STORAGE_PERMISSION)) {
+            pickImage()
+        } else {
+            callbackForPermissionResult.launch(READ_EXTERNAL_STORAGE_PERMISSION)
+        }
     }
 
-    private fun activityResultLauncher(): ActivityResultLauncher<Intent> {
-        val resultLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == AppCompatActivity.RESULT_OK) {
-                    imageUri = result.data?.data
-                    imageUri?.let {
-                        // Load the image located at photoUri into selectedImage
-                        viewModel.updateImageUri(it)
-                        viewModel.inferImage(requireContext(), it)
-                    }
+    private fun pickImage() {
+        // Create intent for picking a photo from the gallery
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        activityResultLauncher.launch(intent)
+    }
+
+    private val activityResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == AppCompatActivity.RESULT_OK) {
+                imageUri = result.data?.data
+                imageUri?.let {
+                    // Load the image located at photoUri into selectedImage
+                    viewModel.updateImageUri(it)
+                    viewModel.inferImage(requireContext(), it)
                 }
             }
-        return resultLauncher
-    }
+        }
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -16,6 +16,9 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.troyt.imagelabeling.databinding.FragmentImagesBinding
+import dev.troyt.imagelabeling.ui.READ_EXTERNAL_STORAGE_PERMISSION
+import dev.troyt.imagelabeling.ui.callbackForPermissionResult
+import dev.troyt.imagelabeling.ui.checkPermission
 import dev.troyt.imagelabeling.ui.defaultDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -24,6 +27,8 @@ import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 class ImagesFragment : Fragment() {
+
+    private val callbackForPermissionResult = callbackForPermissionResult { addImages() }
 
     // Contains the recognition result. Since  it is a viewModel, it will survive screen rotations
     private val viewModel: ImagesViewModel by viewModels()
@@ -41,7 +46,7 @@ class ImagesFragment : Fragment() {
         _binding = FragmentImagesBinding.inflate(inflater, container, false)
         val rootView: View = binding.root
 
-        binding.pickPhotoBtn.setOnClickListener { onPickPhoto() }
+        binding.addImagesBtn.setOnClickListener { onAddImages() }
         binding.clearBtn.setOnClickListener { onClearBtnClick() }
 
         // Initialising the RecyclerView and its linked Adapter
@@ -69,7 +74,15 @@ class ImagesFragment : Fragment() {
         return rootView
     }
 
-    private fun onPickPhoto() {
+    private fun onAddImages() {
+        if (this.checkPermission(READ_EXTERNAL_STORAGE_PERMISSION)) {
+            addImages()
+        } else {
+            callbackForPermissionResult.launch(READ_EXTERNAL_STORAGE_PERMISSION)
+        }
+    }
+
+    private fun addImages() {
         // Create intent for picking a photo from the gallery
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
