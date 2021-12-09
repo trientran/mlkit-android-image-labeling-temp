@@ -58,7 +58,6 @@ class ImagesAdapter(private val context: Context) :
 
 class ImagesRecognitionItemViewHolder(private val binding: ImagesRecognitionItemBinding) :
     RecyclerView.ViewHolder(binding.root) {
-
     // Binding all the fields to the view - to see which UI element is bind to which field, check
     // out layout/recognition_item.xml
     fun bindTo(recognition: Recognition) {

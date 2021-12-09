@@ -3,7 +3,6 @@ package dev.troyt.imagelabeling.ui.images
 import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +20,7 @@ import dev.troyt.imagelabeling.ui.defaultDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 class ImagesFragment : Fragment() {
@@ -53,7 +53,7 @@ class ImagesFragment : Fragment() {
             (binding.recyclerView.layoutManager as LinearLayoutManager).orientation
         val dividerItemDecoration = DividerItemDecoration(requireContext(), layoutOrientation)
         binding.recyclerView.addItemDecoration(dividerItemDecoration)
-        Log.d(tag, "trien")
+
         lifecycleScope.launch {
             // repeatOnLifecycle launches the block in a new coroutine every time the
             // lifecycle is in the STARTED state (or above) and cancels it when it's STOPPED.
@@ -85,7 +85,7 @@ class ImagesFragment : Fragment() {
             if (result.resultCode == AppCompatActivity.RESULT_OK) {
                 result.data?.clipData?.let { clipData ->
                     viewModel.inferImages(requireContext(), clipData)
-                        .catch { Log.e(tag, it.localizedMessage ?: "some error") }
+                        .catch { Timber.e(it.message ?: "Some error") }
                         .onEach { viewModel.addData(it) }
                         .flowOn(defaultDispatcher)
                         .launchIn(lifecycleScope)

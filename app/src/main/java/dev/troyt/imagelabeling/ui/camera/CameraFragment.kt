@@ -1,9 +1,7 @@
 package dev.troyt.imagelabeling.ui.camera
 
-import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,15 +17,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dev.troyt.imagelabeling.R
 import dev.troyt.imagelabeling.databinding.FragmentCameraBinding
-import dev.troyt.imagelabeling.ui.Recognition
+import dev.troyt.imagelabeling.ui.requiredPermissions
+import timber.log.Timber
 import java.util.concurrent.Executors
-
-// Constants
-const val MAX_RESULT_DISPLAY = 3 // Maximum number of results displayed
-private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA) // permission needed
-
-// Listener for the result of the ImageAnalyzer
-typealias RecognitionListener = (recognition: MutableList<Recognition>) -> Unit
 
 class CameraFragment : Fragment() {
 
@@ -35,7 +27,6 @@ class CameraFragment : Fragment() {
     private lateinit var preview: Preview // Preview use case, fast, responsive view of the camera
     private lateinit var imageAnalyzer: ImageAnalysis // Analysis use case, for running ML code
     private lateinit var camera: Camera
-    private val cameraExecutor = Executors.newSingleThreadExecutor()
 
     // Contains the recognition result. Since  it is a viewModel, it will survive screen rotations
     private val cameraViewModel: CameraViewModel by viewModels()
@@ -51,7 +42,6 @@ class CameraFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         _binding = FragmentCameraBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
@@ -64,7 +54,7 @@ class CameraFragment : Fragment() {
                 getString(R.string.camera_permission_required),
                 Toast.LENGTH_SHORT
             ).show()
-            permissionRequestLauncher.launch(REQUIRED_PERMISSIONS)
+            permissionRequestLauncher.launch(requiredPermissions)
         }
 
         // Initialising the resultRecyclerView and its linked viewAdaptor
@@ -78,21 +68,17 @@ class CameraFragment : Fragment() {
         // Attach an observer on the LiveData field of recognitionList
         // This will notify the recycler view to update every time when a new list is set on the
         // LiveData field of recognitionList.
-        cameraViewModel.recognitionList.observe(viewLifecycleOwner,
-            {
-                viewAdapter.submitList(it)
-            }
-        )
+        cameraViewModel.recognitionList.observe(viewLifecycleOwner, {
+            viewAdapter.submitList(it)
+        })
         return root
     }
 
     /**
      * Check all permissions are granted - use for Camera permission in this example.
      */
-    private fun allPermissionsGranted(): Boolean = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(
-            requireContext(), it
-        ) == PackageManager.PERMISSION_GRANTED
+    private fun allPermissionsGranted(): Boolean = requiredPermissions.all {
+        ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
     }
 
     private val permissionRequestLauncher =
@@ -115,7 +101,6 @@ class CameraFragment : Fragment() {
             }
         }
 
-
     /**
      * Start the Camera which involves:
      *
@@ -124,25 +109,19 @@ class CameraFragment : Fragment() {
      * 3. Attach both to the lifecycle of this activity
      * 4. Pipe the output of the preview object to the PreviewView on the screen
      */
-
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
-
         cameraProviderFuture.addListener(Runnable {
-
-            imageAnalyzer = cameraViewModel.analyzeImage(requireContext(), cameraExecutor)
-
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-
             // Select camera, back is the default. If it is not available, choose front camera
             val cameraSelector =
                 if (cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA))
                     CameraSelector.DEFAULT_BACK_CAMERA else CameraSelector.DEFAULT_FRONT_CAMERA
 
-
-            preview = Preview.Builder()
-                .build()
+            preview = Preview.Builder().build()
+            imageAnalyzer =
+                cameraViewModel.analyzeImage(requireContext(), Executors.newSingleThreadExecutor())
 
             try {
                 // Unbind use cases before rebinding
@@ -150,14 +129,13 @@ class CameraFragment : Fragment() {
 
                 // Bind use cases to camera - try to bind everything at once and CameraX will find
                 // the best combination.
-                camera = cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageAnalyzer
-                )
+                camera =
+                    cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalyzer)
 
                 // Attach the preview to preview view, aka View Finder
                 preview.setSurfaceProvider(binding.cameraView.surfaceProvider)
-            } catch (exc: Exception) {
-                Log.e(tag, "Use case binding failed", exc)
+            } catch (e: Exception) {
+                Timber.e(e.message ?: "Some error")
             }
 
         }, ContextCompat.getMainExecutor(requireContext()))

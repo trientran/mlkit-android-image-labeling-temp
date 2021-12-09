@@ -31,10 +31,7 @@ open class HomeAdapter(private val context: Context) :
     /**
      * Inflating the ViewHolder with recognition_item layout and data binding
      */
-    override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int
-    ): ItemViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val inflater = LayoutInflater.from(context)
         val binding = ImageRecognitionItemBinding.inflate(inflater, parent, false)
         return ItemViewHolder(binding)

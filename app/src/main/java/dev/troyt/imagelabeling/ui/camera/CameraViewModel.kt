@@ -33,13 +33,11 @@ class CameraViewModel : ViewModel() {
             // STRATEGY_KEEP_ONLY_LATEST. The following line is optional, kept here for clarity
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .build()
-            .also { analysisUseCase: ImageAnalysis ->
-                analysisUseCase.setAnalyzer(
-                    cameraExecutor,
-                    ImageAnalyzer(context) { items ->
-                        // updating the list of recognised objects
-                        updateData(items)
-                    })
+            .also {
+                it.setAnalyzer(cameraExecutor, ImageAnalyzer(context) { recognitionList ->
+                    // updating the list of recognised objects
+                    updateData(recognitionList)
+                })
             }
     }
 }

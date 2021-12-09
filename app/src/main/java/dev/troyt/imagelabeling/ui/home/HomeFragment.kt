@@ -48,21 +48,16 @@ class HomeFragment : Fragment() {
         // LiveData field of recognitionList.
         viewModel.recognitionList.observe(viewLifecycleOwner, {
             viewAdapter.submitList(it)
-        }
-        )
+        })
         viewModel.imageUri.observe(viewLifecycleOwner, {
             binding.localImageView.setImageURI(it)
-        }
-        )
+        })
         return root
     }
 
     private fun onPickPhoto(resultLauncher: ActivityResultLauncher<Intent>) {
         // Create intent for picking a photo from the gallery
-        val intent = Intent(
-            Intent.ACTION_PICK,
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        )
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         resultLauncher.launch(intent)
     }
 
@@ -73,7 +68,7 @@ class HomeFragment : Fragment() {
                     imageUri = result.data?.data
                     imageUri?.let {
                         // Load the image located at photoUri into selectedImage
-                        viewModel.setImageUri(it)
+                        viewModel.updateImageUri(it)
                         viewModel.inferImage(requireContext(), it)
                     }
                 }

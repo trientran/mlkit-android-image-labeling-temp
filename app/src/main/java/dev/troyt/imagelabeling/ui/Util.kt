@@ -1,5 +1,7 @@
 package dev.troyt.imagelabeling.ui
 
+import android.Manifest
+import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
@@ -7,6 +9,9 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import kotlinx.coroutines.Dispatchers
+import timber.log.Timber
+import timber.log.Timber.DebugTree
+
 
 fun Uri.toScaledBitmap(context: Context, width: Int = 224, height: Int = 224): Bitmap? {
     val bitmapFromUri: Bitmap? =
@@ -36,15 +41,17 @@ fun Uri.toScaledBitmap(context: Context, width: Int = 224, height: Int = 224): B
 data class Recognition(val label: String, val confidence: Float, val imageUri: Uri? = null) {
     // Output probability as a string to enable easy data binding
     val confidencePercentage = String.format("%.1f%%", confidence * 100.0f)
+}
 
-    // For easy logging
-    override fun toString(): String {
-        return "$label / $confidencePercentage"
+class ExampleApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        Timber.plant(DebugTree())
     }
 }
 
-val Recognition.imageUri: Uri? get() = null
-
+val requiredPermissions = arrayOf(Manifest.permission.CAMERA) // permission needed
 val defaultDispatcher = Dispatchers.Default
 val mainDispatcher = Dispatchers.Main
 val ioDispatcher = Dispatchers.IO
+

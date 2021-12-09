@@ -2,7 +2,6 @@ package dev.troyt.imagelabeling.ui.home
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,13 +14,12 @@ import dev.troyt.imagelabeling.ui.Recognition
 import dev.troyt.imagelabeling.ui.defaultDispatcher
 import dev.troyt.imagelabeling.ui.toScaledBitmap
 import kotlinx.coroutines.launch
-
+import timber.log.Timber
 
 class HomeViewModel : ViewModel() {
     // This is a LiveData field. Choosing this structure because the whole list tend to be updated
     // at once in ML and not individual elements. Updating this once for the entire list makes
     // sense.
-    private val tag = HomeViewModel::class.simpleName
 
     private val _imageUri = MutableLiveData<Uri>()
     val imageUri: LiveData<Uri> get() = _imageUri
@@ -32,7 +30,7 @@ class HomeViewModel : ViewModel() {
         _recognitionList.value = recognitions
     }
 
-    fun setImageUri(imageUri: Uri) {
+    fun updateImageUri(imageUri: Uri) {
         _imageUri.value = imageUri
     }
 
@@ -40,7 +38,7 @@ class HomeViewModel : ViewModel() {
         context: Context,
         selectedImageUri: Uri,
         confidence: Float = 0.7f,
-        maxResultsDisplayed: Int = 3
+        maxResultsDisplayed: Int = 3,
     ) {
         // Create a new coroutine on the UI thread
         viewModelScope.launch(defaultDispatcher) {
@@ -49,20 +47,18 @@ class HomeViewModel : ViewModel() {
             val inputImage = InputImage.fromBitmap(bitmap, 0)
 
             // set the minimum confidence required:
-            val options = ImageLabelerOptions.Builder()
-                .setConfidenceThreshold(confidence)
-                .build()
+            val options = ImageLabelerOptions.Builder().setConfidenceThreshold(confidence).build()
 
             val labeler = ImageLabeling.getClient(options)
             labeler.process(inputImage)
-                .addOnSuccessListener { results ->
+                .addOnSuccessListener {
                     val recognitionList = mutableListOf<Recognition>()
                     for (i in 0 until maxResultsDisplayed) {
                         try {
                             recognitionList.add(
                                 Recognition(
-                                    label = results[i].text + " " + results[i].index,
-                                    confidence = results[i].confidence
+                                    label = it[i].text + " " + it[i].index,
+                                    confidence = it[i].confidence
                                 )
                             )
                         } catch (e: IndexOutOfBoundsException) {
@@ -74,11 +70,11 @@ class HomeViewModel : ViewModel() {
                             )
                         }
                     }
-                    Log.d(tag, recognitionList.toString())
+                    Timber.d(recognitionList.toString())
                     updateData(recognitionList)
                 }
                 .addOnFailureListener {
-                    Log.e(tag, it.localizedMessage ?: "some error")
+                    Timber.e(it.message ?: "Some error")
                 }
         }
     }
