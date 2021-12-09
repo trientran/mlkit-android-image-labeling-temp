@@ -1,6 +1,7 @@
 package dev.troyt.imagelabeling.ui.images
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
@@ -75,6 +76,14 @@ class ImagesFragment : Fragment() {
     }
 
     private fun onAddImages() {
+        if (Build.VERSION.SDK_INT > 28) {
+            addImages()
+        } else {
+            checkPermissionAndAction()
+        }
+    }
+
+    private fun checkPermissionAndAction() {
         if (this.checkPermission(READ_EXTERNAL_STORAGE_PERMISSION)) {
             addImages()
         } else {
