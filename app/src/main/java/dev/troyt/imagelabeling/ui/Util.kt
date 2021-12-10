@@ -31,6 +31,7 @@ fun Uri.toScaledBitmap(context: Context, width: Int = 224, height: Int = 224): B
                 MediaStore.Images.Media.getBitmap(context.contentResolver, this)
             }
         } catch (e: Exception) {
+            Timber.e(e.message ?: "Some error")
             null
         }
 
