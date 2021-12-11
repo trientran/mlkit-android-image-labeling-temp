@@ -51,6 +51,8 @@ dependencies {
 
     // Use this dependency to bundle the model with your app
     implementation 'com.google.mlkit:image-labeling:17.0.5'
+    // Use this dependency to bundle the pipeline with your app
+    implementation 'com.google.mlkit:image-labeling-custom:16.3.1'
 
     // CameraX core library using the camera2 implementation
     def camerax_version = "1.0.2"

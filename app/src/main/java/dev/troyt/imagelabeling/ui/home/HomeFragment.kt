@@ -13,10 +13,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
+import com.google.mlkit.common.model.LocalModel
 import dev.troyt.imagelabeling.databinding.FragmentHomeBinding
 import dev.troyt.imagelabeling.ui.READ_EXTERNAL_STORAGE_PERMISSION
 import dev.troyt.imagelabeling.ui.callbackForPermissionResult
 import dev.troyt.imagelabeling.ui.checkPermission
+import timber.log.Timber
 
 class HomeFragment : Fragment() {
 
@@ -25,9 +27,12 @@ class HomeFragment : Fragment() {
     //private val tag = HomeViewModel::class.simpleName
     private var imageUri: Uri? = null
 
+    private lateinit var localModel: LocalModel
+
     // Contains the recognition result. Since  it is a viewModel, it will survive screen rotations
     private val viewModel: HomeViewModel by viewModels()
-    private var _binding: FragmentHomeBinding? = null
+    private var _binding: FragmentHomeBinding? = null //todo late init
+    private lateinit var liteUri: Uri
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -41,6 +46,7 @@ class HomeFragment : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        binding.button.setOnClickListener { openFile() }
         binding.pickImageBtn.setOnClickListener { onPickImage() }
 
         // Initialising the resultRecyclerView and its linked viewAdaptor
@@ -58,6 +64,25 @@ class HomeFragment : Fragment() {
         })
         return root
     }
+
+    fun openFile() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        intent.type = "application/octet-stream"
+        activityResultLauncher2.launch(intent)
+    }
+
+    private val activityResultLauncher2 =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == AppCompatActivity.RESULT_OK) {
+                imageUri = result.data?.data
+                imageUri?.let {
+                    // Load the image located at photoUri into selectedImage
+                    Timber.d(it.toString() + "trien")
+                    viewModel.createTFLiteModel(it)
+
+                }
+            }
+        }
 
     private fun onPickImage() {
         if (Build.VERSION.SDK_INT > 28) {

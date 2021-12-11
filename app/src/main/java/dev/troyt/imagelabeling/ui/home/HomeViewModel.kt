@@ -6,10 +6,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.mlkit.common.model.LocalModel
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
+import com.google.mlkit.vision.label.custom.CustomImageLabelerOptions
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
-import dev.troyt.imagelabeling.R
 import dev.troyt.imagelabeling.ui.Recognition
 import dev.troyt.imagelabeling.ui.defaultDispatcher
 import dev.troyt.imagelabeling.ui.toScaledBitmap
@@ -26,12 +27,23 @@ class HomeViewModel : ViewModel() {
     private val _recognitionList = MutableLiveData<MutableList<Recognition>>(mutableListOf())
     val recognitionList: LiveData<MutableList<Recognition>> get() = _recognitionList
 
+    private val _modelUri = MutableLiveData<Uri>()
+    val modelUri: LiveData<Uri> get() = _modelUri
+
+    lateinit var localModel: LocalModel
+
     private fun updateData(recognitions: MutableList<Recognition>) {
         _recognitionList.value = recognitions
     }
 
     fun updateImageUri(imageUri: Uri) {
         _imageUri.value = imageUri
+    }
+
+    fun createTFLiteModel(modelUri: Uri) {
+        localModel = LocalModel.Builder()
+            .setUri(modelUri)
+            .build()
     }
 
     fun inferImage(
@@ -49,26 +61,22 @@ class HomeViewModel : ViewModel() {
             // set the minimum confidence required:
             val options = ImageLabelerOptions.Builder().setConfidenceThreshold(confidence).build()
 
-            val labeler = ImageLabeling.getClient(options)
+            val customImageLabelerOptions = CustomImageLabelerOptions.Builder(localModel)
+                .setConfidenceThreshold(0.5f)
+                .setMaxResultCount(3)
+                .build()
+
+            val labeler = ImageLabeling.getClient(customImageLabelerOptions)
             labeler.process(inputImage)
                 .addOnSuccessListener {
                     val recognitionList = mutableListOf<Recognition>()
                     for (i in 0 until maxResultsDisplayed) {
-                        try {
-                            recognitionList.add(
-                                Recognition(
-                                    label = it[i].text + " " + it[i].index,
-                                    confidence = it[i].confidence
-                                )
+                        recognitionList.add(
+                            Recognition(
+                                label = it[i].text + " " + it[i].index,
+                                confidence = it[i].confidence
                             )
-                        } catch (e: IndexOutOfBoundsException) {
-                            recognitionList.add(
-                                Recognition(
-                                    label = context.getString(R.string.no_result),
-                                    confidence = 0f
-                                )
-                            )
-                        }
+                        )
                     }
                     Timber.d(recognitionList.toString())
                     updateData(recognitionList)
