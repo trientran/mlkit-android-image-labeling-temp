@@ -24,7 +24,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import dev.troyt.imagelabeling.databinding.ImageRecognitionItemBinding
 import dev.troyt.imagelabeling.ui.Recognition
-import timber.log.Timber
 
 open class HomeAdapter(private val context: Context) :
     ListAdapter<Recognition, ItemViewHolder>(RecognitionDiffUtil()) {
@@ -60,7 +59,6 @@ class ItemViewHolder(private val binding: ImageRecognitionItemBinding) :
     // Binding all the fields to the view - to see which UI element is bind to which field, check
     // out layout/recognition_item.xml
     fun bindTo(recognition: Recognition) {
-        Timber.d("trien ")
         binding.labelTextView.text = recognition.label
         binding.confidenceTextView.text = recognition.confidencePercentage
     }
