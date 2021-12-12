@@ -51,23 +51,21 @@ class HomeViewModel : ViewModel() {
             val inputImage = InputImage.fromBitmap(bitmap, 0)
 
             // set the minimum confidence required:
-            val localModel = LocalModel.Builder()
-                .setAssetFilePath("new_model.tflite")
-                .build()
+            val localModel = LocalModel.Builder().setAssetFilePath("new_model.tflite").build()
 
             // Specify the name you assigned in the Firebase console.
             val remoteModel = CustomRemoteModel
-                .Builder(FirebaseModelSource.Builder("model").build())
+                .Builder(FirebaseModelSource.Builder("new_model").build())
                 .build()
 
             RemoteModelManager.getInstance().isModelDownloaded(remoteModel)
                 .addOnSuccessListener { isDownloaded ->
                     val optionsBuilder =
                         if (isDownloaded) {
-                            Timber.d("Remote model being used Trien")
+                            Timber.d("Remote model being used")
                             CustomImageLabelerOptions.Builder(remoteModel)
                         } else {
-                            Timber.d("Local model being used Trien")
+                            Timber.d("Local model being used")
                             CustomImageLabelerOptions.Builder(localModel)
                         }
                     val options = optionsBuilder

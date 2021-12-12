@@ -37,16 +37,17 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+    }
 
+    override fun onStart() {
+        super.onStart()
         lifecycleScope.launch(ioDispatcher) {
             // Specify the name you assigned in the Firebase console.
             val remoteModel = CustomRemoteModel
-                .Builder(FirebaseModelSource.Builder("model").build())
+                .Builder(FirebaseModelSource.Builder("new_model").build())
                 .build()
 
-            val downloadConditions = DownloadConditions.Builder()
-                .requireWifi()
-                .build()
+            val downloadConditions = DownloadConditions.Builder().requireWifi().build()
 
             RemoteModelManager.getInstance().download(remoteModel, downloadConditions)
                 .addOnSuccessListener {
