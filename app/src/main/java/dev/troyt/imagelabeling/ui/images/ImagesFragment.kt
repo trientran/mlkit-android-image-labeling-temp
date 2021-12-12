@@ -20,11 +20,9 @@ import dev.troyt.imagelabeling.databinding.FragmentImagesBinding
 import dev.troyt.imagelabeling.ui.READ_EXTERNAL_STORAGE_PERMISSION
 import dev.troyt.imagelabeling.ui.callbackForPermissionResult
 import dev.troyt.imagelabeling.ui.checkPermission
-import dev.troyt.imagelabeling.ui.defaultDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 class ImagesFragment : Fragment() {
@@ -107,10 +105,6 @@ class ImagesFragment : Fragment() {
             if (result.resultCode == AppCompatActivity.RESULT_OK) {
                 result.data?.clipData?.let { clipData ->
                     viewModel.inferImages(requireContext(), clipData)
-                        .catch { Timber.e(it.message ?: "Some error") }
-                        .onEach { viewModel.addData(it) }
-                        .flowOn(defaultDispatcher)
-                        .launchIn(lifecycleScope)
                 }
             }
         }
