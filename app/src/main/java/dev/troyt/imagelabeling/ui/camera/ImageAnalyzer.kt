@@ -4,9 +4,14 @@ import android.content.Context
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
+import com.google.mlkit.common.model.CustomRemoteModel
+import com.google.mlkit.common.model.LocalModel
+import com.google.mlkit.common.model.RemoteModelManager
+import com.google.mlkit.linkfirebase.FirebaseModelSource
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.label.ImageLabeler
 import com.google.mlkit.vision.label.ImageLabeling
-import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
+import com.google.mlkit.vision.label.custom.CustomImageLabelerOptions
 import dev.troyt.imagelabeling.R
 import dev.troyt.imagelabeling.ui.Recognition
 import timber.log.Timber
@@ -19,43 +24,71 @@ class ImageAnalyzer(
 
     @ExperimentalGetImage
     override fun analyze(imageProxy: ImageProxy) {
-        val recognitionList = mutableListOf<Recognition>()
         val inputImage = imageProxy.image?.let {
             InputImage.fromMediaImage(it, imageProxy.imageInfo.rotationDegrees)
         }
-
         // set the minimum confidence required:
-        val options = ImageLabelerOptions.Builder().setConfidenceThreshold(0.8f).build()
+        val localModel = LocalModel.Builder().setAssetFilePath("new_model.tflite").build()
 
-        val labeler = ImageLabeling.getClient(options)
-        inputImage?.let {
-            labeler.process(it)
-                .addOnSuccessListener { results ->
-                    for (i in 0 until maxResultsDisplayed) {
-                        try {
-                            recognitionList.add(
-                                Recognition(
-                                    label = results[i].text + " " + results[i].index,
-                                    confidence = results[i].confidence
-                                )
-                            )
-                        } catch (e: Exception) {
-                            recognitionList.add(
-                                Recognition(
-                                    label = context.getString(R.string.no_result),
-                                    confidence = 0f
-                                )
-                            )
-                        }
+        // Specify the name you assigned in the Firebase console.
+        val remoteModel = CustomRemoteModel
+            .Builder(FirebaseModelSource.Builder("new_model").build())
+            .build()
+
+        RemoteModelManager.getInstance().isModelDownloaded(remoteModel)
+            .addOnSuccessListener { isDownloaded ->
+                val optionsBuilder =
+                    if (isDownloaded) {
+                        Timber.d("Remote model being used")
+                        CustomImageLabelerOptions.Builder(remoteModel)
+                    } else {
+                        Timber.d("Local model being used")
+                        CustomImageLabelerOptions.Builder(localModel)
                     }
-                    // Return the result
-                    recognitionListener(recognitionList)
-                    // Close the image,this tells CameraX to feed the next image to the analyzer
-                    imageProxy.close()
+                val options = optionsBuilder
+                    .setConfidenceThreshold(0.0f)
+                    .setMaxResultCount(maxResultsDisplayed)
+                    .build()
+
+                val labeler = ImageLabeling.getClient(options)
+                inputImage?.let {
+                    processImage(labeler, it, imageProxy)
                 }
-                .addOnFailureListener {
-                    Timber.e(it.message ?: "Some error")
+            }
+    }
+
+    private fun processImage(
+        labeler: ImageLabeler,
+        it: InputImage,
+        imageProxy: ImageProxy
+    ) {
+        val recognitionList = mutableListOf<Recognition>()
+        labeler.process(it)
+            .addOnSuccessListener { results ->
+                for (i in 0 until maxResultsDisplayed) {
+                    try {
+                        recognitionList.add(
+                            Recognition(
+                                label = results[i].text + " " + results[i].index,
+                                confidence = results[i].confidence
+                            )
+                        )
+                    } catch (e: Exception) {
+                        recognitionList.add(
+                            Recognition(
+                                label = context.getString(R.string.no_result),
+                                confidence = 0f
+                            )
+                        )
+                    }
                 }
-        }
+                // Return the result
+                recognitionListener(recognitionList)
+                // Close the image,this tells CameraX to feed the next image to the analyzer
+                imageProxy.close()
+            }
+            .addOnFailureListener {
+                Timber.e(it.message ?: "Some error")
+            }
     }
 }
