@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -51,6 +52,11 @@ dependencies {
 
     // Use this dependency to bundle the model with your app
     implementation 'com.google.mlkit:image-labeling:17.0.5'
+    // Image labeling feature with model downloaded from Firebase
+    implementation 'com.google.mlkit:image-labeling-custom:16.3.1'
+    // Or use the dynamically downloaded pipeline in Google Play Services
+    // implementation 'com.google.android.gms:play-services-mlkit-image-labeling-custom:16.0.0-beta1'
+    implementation 'com.google.mlkit:linkfirebase:16.1.1'
 
     // CameraX core library using the camera2 implementation
     def camerax_version = "1.0.2"
@@ -59,6 +65,9 @@ dependencies {
     implementation "androidx.camera:camera-lifecycle:${camerax_version}"
     // If you want to additionally use the CameraX View class
     implementation "androidx.camera:camera-view:1.0.0-alpha31"
+
+    implementation platform('com.google.firebase:firebase-bom:29.0.1')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
 
     implementation 'com.jakewharton.timber:timber:5.0.1'
     implementation 'com.github.bumptech.glide:glide:4.12.0'

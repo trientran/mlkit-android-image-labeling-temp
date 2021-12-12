@@ -2,12 +2,20 @@ package dev.troyt.imagelabeling
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.mlkit.common.model.CustomRemoteModel
+import com.google.mlkit.common.model.DownloadConditions
+import com.google.mlkit.common.model.RemoteModelManager
+import com.google.mlkit.linkfirebase.FirebaseModelSource
 import dev.troyt.imagelabeling.databinding.ActivityMainBinding
+import dev.troyt.imagelabeling.ui.ioDispatcher
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,5 +37,21 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        lifecycleScope.launch(ioDispatcher) {
+            // Specify the name you assigned in the Firebase console.
+            val remoteModel = CustomRemoteModel
+                .Builder(FirebaseModelSource.Builder("model").build())
+                .build()
+
+            val downloadConditions = DownloadConditions.Builder()
+                .requireWifi()
+                .build()
+
+            RemoteModelManager.getInstance().download(remoteModel, downloadConditions)
+                .addOnSuccessListener {
+                    Timber.d("Model download completed")
+                }
+        }
     }
 }

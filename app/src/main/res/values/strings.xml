@@ -10,5 +10,6 @@
     <string name="camera_permission_required">Camera access permission required!</string>
     <string name="error_toast">An error occurred</string>
     <string name="clear_all">Clear all</string>
+    <string name="model_downloaded">ML model downloaded</string>
 
 </resources>

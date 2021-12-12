@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "332199824930",
+    "project_id": "mlkit-vision-classify-custom",
+    "storage_bucket": "mlkit-vision-classify-custom.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:332199824930:android:61f050eb2245201c32047b",
+        "android_client_info": {
+          "package_name": "dev.troyt.imagelabeling"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "332199824930-orht5ro2plo97oqgtufphkckec4ij7u8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAwKFoZ4ym2R_Rl6CN0EKgglxc_bH0Vj5U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "332199824930-orht5ro2plo97oqgtufphkckec4ij7u8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
