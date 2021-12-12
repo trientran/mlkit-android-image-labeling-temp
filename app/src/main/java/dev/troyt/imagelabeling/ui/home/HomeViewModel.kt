@@ -41,7 +41,7 @@ class HomeViewModel : ViewModel() {
     fun inferImage(
         context: Context,
         selectedImageUri: Uri,
-        confidence: Float = 0.5f,
+        confidence: Float = 0.0f,
         maxResultsDisplayed: Int = 3,
     ) {
         // Create a new coroutine on the UI thread
