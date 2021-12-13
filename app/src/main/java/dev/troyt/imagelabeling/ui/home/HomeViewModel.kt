@@ -15,9 +15,7 @@ import com.google.mlkit.vision.label.ImageLabeler
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.custom.CustomImageLabelerOptions
 import dev.troyt.imagelabeling.R
-import dev.troyt.imagelabeling.ui.Recognition
-import dev.troyt.imagelabeling.ui.defaultDispatcher
-import dev.troyt.imagelabeling.ui.toScaledBitmap
+import dev.troyt.imagelabeling.ui.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -38,6 +36,7 @@ class HomeViewModel : ViewModel() {
         _imageUri.value = imageUri
     }
 
+
     fun inferImage(
         context: Context,
         selectedImageUri: Uri,
@@ -51,11 +50,11 @@ class HomeViewModel : ViewModel() {
             val inputImage = InputImage.fromBitmap(bitmap, 0)
 
             // set the minimum confidence required:
-            val localModel = LocalModel.Builder().setAssetFilePath("new_model.tflite").build()
+            val localModel = LocalModel.Builder().setAssetFilePath(LOCAL_TFLITE_MODEL_NAME).build()
 
             // Specify the name you assigned in the Firebase console.
             val remoteModel = CustomRemoteModel
-                .Builder(FirebaseModelSource.Builder("new_model").build())
+                .Builder(FirebaseModelSource.Builder(REMOTE_TFLITE_MODEL_NAME).build())
                 .build()
 
             RemoteModelManager.getInstance().isModelDownloaded(remoteModel)

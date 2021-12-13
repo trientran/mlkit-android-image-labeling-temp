@@ -73,6 +73,8 @@ fun Fragment.callbackForPermissionResult(action: () -> Unit) =
 
 const val CAMERA_PERMISSION = Manifest.permission.CAMERA
 const val READ_EXTERNAL_STORAGE_PERMISSION = Manifest.permission.READ_EXTERNAL_STORAGE
+const val LOCAL_TFLITE_MODEL_NAME = "herb.tflite"
+const val REMOTE_TFLITE_MODEL_NAME = "herb_model"
 val defaultDispatcher = Dispatchers.Default
 val mainDispatcher = Dispatchers.Main
 val ioDispatcher = Dispatchers.IO
