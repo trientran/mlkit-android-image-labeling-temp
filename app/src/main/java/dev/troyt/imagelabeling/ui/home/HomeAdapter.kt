@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.troyt.imagelabeling.ui.home
+package dev.trien.uri.lee.herb.ui.home
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -22,8 +22,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import dev.troyt.imagelabeling.databinding.ImageRecognitionItemBinding
-import dev.troyt.imagelabeling.ui.Recognition
+import dev.trien.uri.lee.herb.databinding.ImageRecognitionItemBinding
+import dev.trien.uri.lee.herb.ui.Recognition
 
 open class HomeAdapter(private val context: Context) :
     ListAdapter<Recognition, ItemViewHolder>(RecognitionDiffUtil()) {

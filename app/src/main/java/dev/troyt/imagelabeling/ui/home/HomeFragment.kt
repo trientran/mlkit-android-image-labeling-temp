@@ -1,4 +1,4 @@
-package dev.troyt.imagelabeling.ui.home
+package dev.trien.uri.lee.herb.ui.home
 
 import android.content.Intent
 import android.net.Uri
@@ -13,10 +13,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
-import dev.troyt.imagelabeling.databinding.FragmentHomeBinding
-import dev.troyt.imagelabeling.ui.READ_EXTERNAL_STORAGE_PERMISSION
-import dev.troyt.imagelabeling.ui.callbackForPermissionResult
-import dev.troyt.imagelabeling.ui.checkPermission
+import dev.trien.uri.lee.herb.databinding.FragmentHomeBinding
+import dev.trien.uri.lee.herb.ui.READ_EXTERNAL_STORAGE_PERMISSION
+import dev.trien.uri.lee.herb.ui.callbackForPermissionResult
+import dev.trien.uri.lee.herb.ui.checkPermission
 
 class HomeFragment : Fragment() {
 

@@ -1,4 +1,4 @@
-package dev.troyt.imagelabeling
+package dev.trien.uri.lee.herb
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -12,8 +12,8 @@ import com.google.mlkit.common.model.CustomRemoteModel
 import com.google.mlkit.common.model.DownloadConditions
 import com.google.mlkit.common.model.RemoteModelManager
 import com.google.mlkit.linkfirebase.FirebaseModelSource
-import dev.troyt.imagelabeling.databinding.ActivityMainBinding
-import dev.troyt.imagelabeling.ui.ioDispatcher
+import dev.trien.uri.lee.herb.databinding.ActivityMainBinding
+import dev.trien.uri.lee.herb.ui.ioDispatcher
 import kotlinx.coroutines.launch
 import timber.log.Timber
 

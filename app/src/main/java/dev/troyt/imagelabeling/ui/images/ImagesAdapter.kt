@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.troyt.imagelabeling.ui.images
+package dev.trien.uri.lee.herb.ui.images
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -23,8 +23,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import dev.troyt.imagelabeling.databinding.ImagesRecognitionItemBinding
-import dev.troyt.imagelabeling.ui.Recognition
+import dev.trien.uri.lee.herb.databinding.ImagesRecognitionItemBinding
+import dev.trien.uri.lee.herb.ui.Recognition
 
 class ImagesAdapter(private val context: Context) :
     ListAdapter<Recognition, ImagesRecognitionItemViewHolder>(RecognitionDiffUtil()) {

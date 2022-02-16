@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package dev.troyt.imagelabeling.ui.camera
+package dev.trien.uri.lee.herb.ui.camera
 
 import android.content.Context
-import dev.troyt.imagelabeling.ui.home.HomeAdapter
+import dev.trien.uri.lee.herb.ui.home.HomeAdapter
 
 class CameraAdapter(context: Context) : HomeAdapter(context)

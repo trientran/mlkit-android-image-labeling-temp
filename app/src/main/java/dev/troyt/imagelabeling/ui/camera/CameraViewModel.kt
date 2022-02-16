@@ -1,4 +1,4 @@
-package dev.troyt.imagelabeling.ui.camera
+package dev.trien.uri.lee.herb.ui.camera
 
 import android.content.Context
 import android.util.Size
@@ -6,7 +6,7 @@ import androidx.camera.core.ImageAnalysis
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import dev.troyt.imagelabeling.ui.Recognition
+import dev.trien.uri.lee.herb.ui.Recognition
 import java.util.concurrent.ExecutorService
 
 class CameraViewModel : ViewModel() {

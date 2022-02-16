@@ -1,4 +1,4 @@
-package dev.troyt.imagelabeling.ui.camera
+package dev.trien.uri.lee.herb.ui.camera
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,10 +12,10 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import dev.troyt.imagelabeling.databinding.FragmentCameraBinding
-import dev.troyt.imagelabeling.ui.CAMERA_PERMISSION
-import dev.troyt.imagelabeling.ui.callbackForPermissionResult
-import dev.troyt.imagelabeling.ui.checkPermission
+import dev.trien.uri.lee.herb.databinding.FragmentCameraBinding
+import dev.trien.uri.lee.herb.ui.CAMERA_PERMISSION
+import dev.trien.uri.lee.herb.ui.callbackForPermissionResult
+import dev.trien.uri.lee.herb.ui.checkPermission
 import timber.log.Timber
 import java.util.concurrent.Executors
 

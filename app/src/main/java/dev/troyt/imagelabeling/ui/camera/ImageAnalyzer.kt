@@ -1,4 +1,4 @@
-package dev.troyt.imagelabeling.ui.camera
+package dev.trien.uri.lee.herb.ui.camera
 
 import android.content.Context
 import androidx.camera.core.ExperimentalGetImage
@@ -12,10 +12,10 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeler
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.custom.CustomImageLabelerOptions
-import dev.troyt.imagelabeling.R
-import dev.troyt.imagelabeling.ui.LOCAL_TFLITE_MODEL_NAME
-import dev.troyt.imagelabeling.ui.REMOTE_TFLITE_MODEL_NAME
-import dev.troyt.imagelabeling.ui.Recognition
+import dev.trien.uri.lee.herb.R
+import dev.trien.uri.lee.herb.ui.LOCAL_TFLITE_MODEL_NAME
+import dev.trien.uri.lee.herb.ui.REMOTE_TFLITE_MODEL_NAME
+import dev.trien.uri.lee.herb.ui.Recognition
 import timber.log.Timber
 
 class ImageAnalyzer(

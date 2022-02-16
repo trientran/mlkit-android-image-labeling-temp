@@ -1,4 +1,4 @@
-package dev.troyt.imagelabeling.ui
+package dev.trien.uri.lee.herb.ui
 
 import android.Manifest
 import android.app.Application
@@ -13,7 +13,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import dev.troyt.imagelabeling.R
+import dev.trien.uri.lee.herb.R
 import kotlinx.coroutines.Dispatchers
 import timber.log.Timber
 

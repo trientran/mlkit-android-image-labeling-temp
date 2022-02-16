@@ -1,4 +1,4 @@
-package dev.troyt.imagelabeling.ui.images
+package dev.trien.uri.lee.herb.ui.images
 
 import android.content.ClipData
 import android.content.Context
@@ -13,8 +13,8 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeler
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.custom.CustomImageLabelerOptions
-import dev.troyt.imagelabeling.R
-import dev.troyt.imagelabeling.ui.*
+import dev.trien.uri.lee.herb.R
+import dev.trien.uri.lee.herb.ui.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*

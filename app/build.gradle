@@ -8,10 +8,10 @@ android {
     compileSdk 31
 
     defaultConfig {
-        applicationId "dev.troyt.imagelabeling"
+        applicationId "dev.trien.uri.lee.herb"
         minSdk 26
         targetSdk 31
-        versionCode 1
+        versionCode 5
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

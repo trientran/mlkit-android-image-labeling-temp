@@ -1,4 +1,4 @@
-package dev.troyt.imagelabeling.ui.images
+package dev.trien.uri.lee.herb.ui.images
 
 import android.content.Intent
 import android.os.Build
@@ -16,10 +16,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import dev.troyt.imagelabeling.databinding.FragmentImagesBinding
-import dev.troyt.imagelabeling.ui.READ_EXTERNAL_STORAGE_PERMISSION
-import dev.troyt.imagelabeling.ui.callbackForPermissionResult
-import dev.troyt.imagelabeling.ui.checkPermission
+import dev.trien.uri.lee.herb.databinding.FragmentImagesBinding
+import dev.trien.uri.lee.herb.ui.READ_EXTERNAL_STORAGE_PERMISSION
+import dev.trien.uri.lee.herb.ui.callbackForPermissionResult
+import dev.trien.uri.lee.herb.ui.checkPermission
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch

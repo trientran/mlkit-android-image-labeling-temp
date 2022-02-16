@@ -1,4 +1,4 @@
-package dev.troyt.imagelabeling.ui.home
+package dev.trien.uri.lee.herb.ui.home
 
 import android.content.Context
 import android.net.Uri
@@ -14,8 +14,8 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeler
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.custom.CustomImageLabelerOptions
-import dev.troyt.imagelabeling.R
-import dev.troyt.imagelabeling.ui.*
+import dev.trien.uri.lee.herb.R
+import dev.trien.uri.lee.herb.ui.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
